@@ -1311,7 +1311,7 @@ function viewWorkout(){
 }
 function unitFor(name){ return name.includes("(sec)")?"sec":name==="Corde à sauter (min)"?"min":"reps"; }
 function exBlock(e,i){
-  const l=lastFor(e.name), u=unitFor(e.name);
+  const l=lastFor(e.name), u=unitFor(e.name), bw=BODYWEIGHT.has(e.name)||/lesté/.test(e.name);
   const prev=l?`Dernière fois : ${l.sets.map(x=>`${num(x.kg)}×${num(x.reps)}`).join(", ")}`:"Première fois sur cet exo";
   const cat=CATS.find(c=>c.src&&c.src.some(s=>s[0]===e.name));
   return `<div class="ex">
@@ -1319,10 +1319,10 @@ function exBlock(e,i){
       ${i>0?`<button class="del" onclick="moveEx(${i},-1)">↑</button>`:""}
       <button class="del" onclick="confirmBox('Retirer cet exercice ?','rmEx(${i})')">⋯</button></div></div>
     <div class="prev"><span title="Effort">${effortTag(e.name)}</span> ${prev}${cat?` · <span style="color:var(--acc)">${cat.ic} ${cat.name}</span>`:""}</div>
-    <div class="lbl"><span>#</span><span>kg</span><span>${u}</span><span></span><span></span></div>
+    <div class="lbl"><span>#</span><span>${bw?"lest kg":"kg"}</span><span>${u}</span><span></span><span></span></div>${bw?`<div class="small mut" style="text-align:center;margin:-2px 0 4px">Poids du corps : laisse vide (ou 0), ou mets le lest ajouté</div>`:""}
     ${e.sets.map((s,j)=>`<div class="set ${s.done?"done":""}">
       <span class="n">${j+1}</span>
-      <input inputmode="decimal" value="${esc(s.kg)}" placeholder="${l&&l.sets[j]?num(l.sets[j].kg):"0"}" oninput="setVal(${i},${j},'kg',this.value)">
+      <input inputmode="decimal" value="${esc(s.kg)}" placeholder="${l&&l.sets[j]&&num(l.sets[j].kg)?num(l.sets[j].kg):(bw?"PDC":"0")}" oninput="setVal(${i},${j},'kg',this.value)">
       <input inputmode="numeric" value="${esc(s.reps)}" placeholder="${l&&l.sets[j]?num(l.sets[j].reps):"0"}" oninput="setVal(${i},${j},'reps',this.value)">
       <button class="chk" onclick="toggleSet(${i},${j})">✓</button>
       <button class="del" onclick="rmSet(${i},${j})">×</button>
