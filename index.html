@@ -2066,7 +2066,7 @@ async function doAuth(){
     if(authMode==="signup"){
       const ps=($("#auP").value||"").trim();
       if(ps.length<2){ err.textContent="Choisis un pseudo (2 caractères minimum)."; return; }
-      const {data,error}=await sb.auth.signUp({email:e,password:w,options:{data:{pseudo:ps}}});
+      const {data,error}=await sb.auth.signUp({email:e,password:w,options:{data:{pseudo:ps},emailRedirectTo:location.origin+location.pathname}});
       if(error) throw error;
       S.settings.name=ps;
       if(!data.session){ err.style.color="var(--txt)"; err.textContent="📧 Compte créé ! Clique sur le lien reçu par mail, puis connecte-toi."; authMode="login"; return; }
