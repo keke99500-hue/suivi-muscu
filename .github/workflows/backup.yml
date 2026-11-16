@@ -1,0 +1,28 @@
+# Sauvegarde automatique de la base chaque lundi (et garde le projet Supabase actif)
+name: Sauvegarde Supabase
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exporter les tables
+        env:
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          set -e
+          d=backups/$(date +%Y-%m-%d); mkdir -p "$d"
+          for t in profiles user_meta sessions nutrition_days groups group_members public_stats; do
+            curl -sf "$SB_URL/rest/v1/$t?select=*" -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" -o "$d/$t.json"
+          done
+          ls backups | sort | head -n -8 | while read old; do rm -rf "backups/$old"; done
+      - name: Enregistrer
+        run: |
+          git config user.name "sauvegarde-bot"; git config user.email "bot@users.noreply.github.com"
+          git add backups; git commit -m "Sauvegarde $(date +%Y-%m-%d)" || echo "Rien de nouveau"; git push
