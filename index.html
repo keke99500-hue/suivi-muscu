@@ -331,6 +331,13 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .lb-row:last-child{border-bottom:0}
 .lb-row.me{background:var(--acc-soft);margin:0 -12px;padding:10px 12px}
 .lb-pos{width:22px;text-align:center;color:var(--mut)}
+.subranks{display:flex;justify-content:center;gap:4px;margin-top:6px}
+.subranks>div{display:flex;flex-direction:column;align-items:center;font-size:9.5px;font-weight:800;min-width:0}
+.subranks span{white-space:nowrap}
+.steps-bars{display:flex;align-items:flex-end;gap:6px;height:54px;margin-top:10px}
+.steps-bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mut);font-weight:700;height:100%;justify-content:flex-end}
+.steps-bars i{width:100%;border-radius:5px;background:var(--line);min-height:3px;transition:height .6s}
+.steps-bars .ok i{background:var(--acc)}
 </style>
 </head>
 <body>
@@ -345,7 +352,7 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 /* ================= Données de base ================= */
 const PRESETS = {
   "Pecs / Épaules / Triceps":["Développé couché","Développé incliné","Développé militaire","Élévations latérales","Pompes","Dips","Extension triceps barre (skull crusher)","Développé serré","Extension nuque (haltère)","Extension nuque (barre)","Extension couchée haltères","Kickback haltère","Extension triceps poulie (corde)","Pushdown barre (poulie)","Extension un bras (poulie)","JM press","Tate press","Pompes triceps (coudes serrés)"],
-  "Dos / Biceps":["Rowing barre","Rowing un bras","Tractions","Soulevé de terre","Pull-over","Curl barre","Curl haltère","Curl marteau","Shrugs"],
+  "Dos / Biceps":["Rowing barre","Rowing un bras","Tractions","Soulevé de terre","Pull-over","Curl barre","Curl haltère","Curl marteau","Curl inversé","Curl poignets","Suspension à la barre (sec)","Shrugs"],
   "Jambes":["Squat","Soulevé de terre roumain","Fentes","Hip thrust","Split squat bulgare","Mollets debout","Good morning"],
   "Street workout":["Tractions australiennes","Tractions supination (chin-up)","Tractions lestées","Muscle-up","Dips sur banc","Dips lestés","Pompes diamant","Pompes déclinées","Pompes archer","Pompes claquées","Pike push-up","Handstand push-up","Squat sauté","Pistol squat","Relevés de jambes à la barre","Toes to bar","Dragon flag","L-sit (sec)","Hollow body (sec)","Front lever tuck (sec)","Front lever (sec)","Planche tuck (sec)","Planche (sec)","Mountain climbers"],
   "Abdos / Cardio":["Gainage (sec)","Crunch","Relevés de jambes","Ab wheel","Corde à sauter (min)","Burpees"]
@@ -443,14 +450,14 @@ const BG_GRADS={
 };
 const BG_ANIMS={aurora:"Aurore",stars:"Étoiles",grid:"Grille néon",embers:"Braises",pulse:"Pulsation"};
 const BG_ANIM_PV={aurora:"radial-gradient(circle at 30% 30%,var(--acc),transparent 60%),radial-gradient(circle at 80% 70%,#8b5cff,transparent 55%),#0a0d16",stars:"radial-gradient(1px 1px at 10px 10px,#fff,transparent),radial-gradient(1px 1px at 30px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 50px 18px,#fff,transparent),#05060f",grid:"linear-gradient(transparent 55%,color-mix(in srgb,var(--acc) 45%,transparent)),repeating-linear-gradient(90deg,transparent 0 10px,color-mix(in srgb,var(--acc) 50%,transparent) 10px 11px),#0a0d16",embers:"radial-gradient(3px 3px at 20% 70%,var(--acc),transparent),radial-gradient(2px 2px at 60% 40%,#ffd75e,transparent),radial-gradient(3px 3px at 80% 80%,var(--acc),transparent),#0a0a0b",pulse:"radial-gradient(70% 60% at 50% 0%,var(--acc),transparent),#0a0a0b"};
-const HOME_BLOCKS={gauge:["🔥","Jauge du jour"],live:["⏱️","Séance en cours"],quick:["⚡","Actions rapides"],stats:["📊","Stats express"],week:["📅","Ma semaine"],level:["⭐","Niveau & XP"],programs:["🏋️","Programmes"],rank:["🛡️","Mon rang"],nutrition:["🍽️","Nutrition du jour"],weight:["⚖️","Mon poids"],quote:["💬","Phrase du jour"],history:["🕘","Dernières séances"]};
-const HOME_DEFAULT={order:["gauge","live","quick","week","level","stats","programs","rank","nutrition","weight","quote","history"],hidden:["stats","weight","quote"]};
+const HOME_BLOCKS={gauge:["🔥","Jauge du jour"],live:["⏱️","Séance en cours"],quick:["⚡","Actions rapides"],steps:["👟","Pas du jour"],stats:["📊","Stats express"],week:["📅","Ma semaine"],level:["⭐","Niveau & XP"],programs:["🏋️","Programmes"],rank:["🛡️","Mon rang"],nutrition:["🍽️","Nutrition du jour"],weight:["⚖️","Mon poids"],quote:["💬","Phrase du jour"],history:["🕘","Dernières séances"]};
+const HOME_DEFAULT={order:["gauge","live","quick","steps","week","level","stats","programs","rank","nutrition","weight","quote","history"],hidden:["stats","weight","quote"]};
 const HOME_PRESETS={
   defaut:{l:"Par défaut",order:HOME_DEFAULT.order,hidden:HOME_DEFAULT.hidden},
   complet:{l:"Complet",order:HOME_DEFAULT.order,hidden:[]},
   minimal:{l:"Minimal",order:["gauge","live","quick","level"],hidden:[],gauge:"compact"},
-  training:{l:"Focus training",order:["live","quick","gauge","week","level","programs","rank","history"],hidden:[]},
-  nutrition:{l:"Focus nutrition",order:["gauge","nutrition","weight","live","quick","week"],hidden:[],gauge:"compact"},
+  training:{l:"Focus training",order:["live","quick","gauge","steps","week","level","programs","rank","history"],hidden:[]},
+  nutrition:{l:"Focus nutrition",order:["gauge","steps","nutrition","weight","live","quick","week"],hidden:[],gauge:"compact"},
   gamer:{l:"Mode gamer",order:["level","rank","gauge","quick","live","week","history"],hidden:[]}
 };
 const QUOTES=["La seule mauvaise séance, c'est celle que tu n'as pas faite.","Pas besoin d'être motivé, juste d'être régulier.","Chaque rep compte, même celle que personne ne voit.","Le corps suit ce que la tête décide.","Petite séance vaut mieux que pas de séance.","Tu ne regretteras jamais d'y être allé.","La discipline, c'est choisir ce que tu veux le plus plutôt que ce que tu veux maintenant.","Aujourd'hui lourd, demain léger.","Les résultats aiment la patience.","Bats ton toi d'hier, pas les autres."];
@@ -474,8 +481,10 @@ const CLASSIC = [
 let TIERS = CLASSIC;
 // src : [exercice, type, multiplicateur]  type: e1 = 1RM estimé, reps = reps max sur une série, val = valeur brute (sec / min)
 const CATS = [
-  {id:"bras",name:"Bras",ic:"💪",unit:"kg / bras",desc:"1RM estimé au curl, ramené par bras",src:[["Curl barre","e1",.5],["Curl haltère","e1",1],["Curl marteau","e1",1]],th:[6,9,12,15,19,24,30]},
-  {id:"triceps",name:"Triceps",ic:"🔱",unit:"kg",desc:"1RM estimé à l'extension barre",src:[["Extension triceps barre (skull crusher)","e1",1],["Extension nuque (barre)","e1",1],["JM press","e1",.8],["Développé serré","e1",.55],["Extension couchée haltères","e1",1.6],["Extension nuque (haltère)","e1",1.1],["Pushdown barre (poulie)","e1",.75],["Extension triceps poulie (corde)","e1",.7]],th:[10,15,22,30,40,50,62]},
+  {id:"bras",name:"Bras",ic:"💪",unit:"pts",desc:"Moyenne de tes 3 sous-rangs : Biceps, Triceps et Avant-bras",composite:["biceps","triceps","avantbras"],_st:Array.from({length:21},(_,i)=>i+1),th:[1,4,7,10,13,16,19]},
+  {id:"biceps",parent:"bras",name:"Biceps",ic:"💪",unit:"kg / bras",desc:"1RM estimé au curl, ramené par bras",src:[["Curl barre","e1",.5],["Curl haltère","e1",1],["Curl marteau","e1",.9]],th:[6,9,12,15,19,24,30]},
+  {id:"avantbras",parent:"bras",name:"Avant-bras",ic:"✊",unit:"pts",desc:"Force de grip : curl marteau / inversé / poignets (1RM estimé) ou suspension à la barre (secondes ÷ 4)",src:[["Curl marteau","e1",1],["Curl inversé","e1",1.3],["Curl poignets","e1",.8],["Suspension à la barre (sec)","val",.25]],th:[5,8,11,14,18,23,29]},
+  {id:"triceps",parent:"bras",name:"Triceps",ic:"🔱",unit:"kg",desc:"1RM estimé à l'extension barre",src:[["Extension triceps barre (skull crusher)","e1",1],["Extension nuque (barre)","e1",1],["JM press","e1",.8],["Développé serré","e1",.55],["Extension couchée haltères","e1",1.6],["Extension nuque (haltère)","e1",1.1],["Pushdown barre (poulie)","e1",.75],["Extension triceps poulie (corde)","e1",.7]],th:[10,15,22,30,40,50,62]},
   {id:"pecs",name:"Pecs",ic:"🛡️",unit:"kg",desc:"1RM estimé au développé couché",src:[["Développé couché","e1",1],["Développé incliné","e1",1.15]],th:[30,45,60,80,100,120,145]},
   {id:"epaules",name:"Épaules",ic:"🏔️",unit:"kg",desc:"1RM estimé au développé militaire",src:[["Développé militaire","e1",1]],th:[20,30,40,52,65,80,95]},
   {id:"dos",name:"Dos",ic:"🦅",unit:"kg",desc:"1RM estimé au rowing",src:[["Rowing barre","e1",1],["Rowing un bras","e1",1.8]],th:[30,45,60,78,95,115,135]},
@@ -486,6 +495,7 @@ const CATS = [
   {id:"core",name:"Gainage",ic:"🧱",unit:"sec",desc:"Gainage le plus long",src:[["Gainage (sec)","val",1]],th:[20,40,60,90,120,180,300]},
   {id:"cardio",name:"Cardio",ic:"⚡",unit:"pts",desc:"Burpees max en une série, ou minutes de corde ×5",src:[["Burpees","reps",1],["Corde à sauter (min)","val",5]],th:[5,10,15,20,30,40,50]},
   {id:"skills",name:"Skills street",ic:"🤸",unit:"pts",desc:"Figures de street workout (L-sit, front lever, planche, muscle-up, HSPU, pistol, dragon flag)",src:[["L-sit (sec)","val",1],["Front lever tuck (sec)","val",1.5],["Front lever (sec)","val",4],["Planche tuck (sec)","val",2],["Planche (sec)","val",6],["Muscle-up","reps",8],["Handstand push-up","reps",5],["Pistol squat","reps",3],["Dragon flag","reps",4]],th:[8,15,25,40,60,85,120]},
+  {id:"pas",name:"Pas",ic:"👟",unit:"pas / jour",desc:"Moyenne de tes pas sur les 7 derniers jours (jours notés). Compte moitié moins dans le rang global",special:"steps",w:.5,th:[3000,5000,7000,9000,11000,14000,18000]},
   {id:"regu",name:"Régularité",ic:"📅",unit:"séances / 30 j",desc:"Nombre de séances sur les 30 derniers jours",special:"regu",th:[1,4,7,10,13,16,20]}
 ];
 
@@ -498,7 +508,7 @@ const EX_COEF = {
   "Développé couché":1.4,"Développé militaire":1.4,"Rowing barre":1.4,"Fentes":1.4,"Soulevé de terre roumain":1.4,"Hip thrust":1.3,"Dips":1.4,"Good morning":1.3,"Développé incliné":1.4,
   "Muscle-up":2.1,"Handstand push-up":1.9,"Planche (sec)":2.2,"Planche tuck (sec)":1.7,"Front lever (sec)":2,"Front lever tuck (sec)":1.6,"Pistol squat":1.7,"Tractions lestées":1.8,"Dips lestés":1.6,"Tractions supination (chin-up)":1.6,"Dragon flag":1.6,"Toes to bar":1.5,"Pompes claquées":1.5,"Pompes archer":1.45,"Squat sauté":1.4,"L-sit (sec)":1.4,"Pike push-up":1.3,"Relevés de jambes à la barre":1.3,"Mountain climbers":1.2,"Pompes diamant":1.2,"Pompes déclinées":1.2,"Tractions australiennes":1.1,"Dips sur banc":1,"Hollow body (sec)":1,
   "Pompes":1.15,"Rowing un bras":1.15,"Développé serré":1.2,"Pull-over":1.1,"Ab wheel":1.1,
-  "Curl barre":.85,"Curl haltère":.8,"Curl marteau":.8,"Élévations latérales":.8,"Extension triceps barre (skull crusher)":.85,"Extension nuque (haltère)":.8,"Extension nuque (barre)":.85,"Extension couchée haltères":.8,"Kickback haltère":.7,"Extension triceps poulie (corde)":.75,"Pushdown barre (poulie)":.75,"Extension un bras (poulie)":.7,"JM press":1.05,"Tate press":.8,"Pompes triceps (coudes serrés)":1.15,"Shrugs":.75,"Mollets debout":.75,"Crunch":.7,"Relevés de jambes":.8,"Gainage (sec)":.9
+  "Curl barre":.85,"Curl haltère":.8,"Curl marteau":.8,"Curl inversé":.75,"Curl poignets":.6,"Suspension à la barre (sec)":.8,"Élévations latérales":.8,"Extension triceps barre (skull crusher)":.85,"Extension nuque (haltère)":.8,"Extension nuque (barre)":.85,"Extension couchée haltères":.8,"Kickback haltère":.7,"Extension triceps poulie (corde)":.75,"Pushdown barre (poulie)":.75,"Extension un bras (poulie)":.7,"JM press":1.05,"Tate press":.8,"Pompes triceps (coudes serrés)":1.15,"Shrugs":.75,"Mollets debout":.75,"Crunch":.7,"Relevés de jambes":.8,"Gainage (sec)":.9
 };
 const coefOf = n => EX_COEF[n] ?? 1;
 function effortTag(n){ const c=coefOf(n); return c>=1.5?"⚡⚡⚡":c>=1.2?"⚡⚡":"⚡"; }
@@ -521,7 +531,10 @@ function computeXP(){
     const k=todayKey(new Date(s.date)), raw=sessionRawXP(s), used=dayUsed[k]||0, g=Math.max(0,Math.min(raw,XP_DAY_CAP-used));
     dayUsed[k]=used+g; per[s.id]={raw,gain:g}; total+=g;
   });
-  return {total,per,today:dayUsed[todayKey()]||0};
+  // les pas rapportent un peu d'XP (max 20 / jour), dans la limite quotidienne
+  const stepGain={};
+  Object.entries(S.steps||{}).forEach(([k,n])=>{ const raw=Math.min(20,Math.floor(num(n)/500)), used=dayUsed[k]||0, g=Math.max(0,Math.min(raw,XP_DAY_CAP-used)); if(g>0){ dayUsed[k]=used+g; stepGain[k]=g; total+=g; } });
+  return {total,per,stepGain,today:dayUsed[todayKey()]||0};
 }
 function levelOf(total){ let L=1, x=total; while(x>=xpNeed(L)){ x-=xpNeed(L); L++; } return {L,into:x,need:xpNeed(L),total}; }
 function ensureLvl(){ if(S.seenLvl===undefined) S.seenLvl=levelOf(computeXP().total).L; if(booted) migrateRanks(); }
@@ -569,7 +582,8 @@ function todayScore(){
   const k=todayKey(); let sc=0, nS=0, sets=0;
   S.sessions.forEach(s=>{ if(todayKey(new Date(s.date))===k){ sc+=sessionRawXP(s); nS++; sets+=s.exercises.reduce((a,e)=>a+e.sets.filter(x=>x.done).length,0); } });
   if(S.current){ const r=sessionRawXP(S.current,(Date.now()-S.current.date)/60000); sc+=r; sets+=S.current.exercises.reduce((a,e)=>a+e.sets.filter(x=>x.done).length,0); }
-  return {sc,nS,sets};
+  const steps=num((S.steps||{})[k]), stepPts=Math.min(60,Math.round(steps/250)); sc+=stepPts;
+  return {sc,nS,sets,steps,stepPts};
 }
 function gaugeOf(sc){
   let t=0; GAUGE.forEach((g,i)=>{ if(sc>=g.min) t=i; });
@@ -592,7 +606,7 @@ function gaugeSVG(G){
   </svg>`;
 }
 function gaugeInfo(){
-  modal(`<h3>Jauge d'activité du jour</h3><div class="small mut" style="margin-bottom:12px">Calculée avec l'XP brute de tes séances du jour (durée, séries, reps, charge, effort de l'exo). Pas de limite ici : vas-y, casse la jauge.</div>
+  modal(`<h3>Jauge d'activité du jour</h3><div class="small mut" style="margin-bottom:12px">Calculée avec l'XP brute de tes séances du jour (durée, séries, reps, charge, effort de l'exo), plus un petit bonus pour tes pas (1 pt pour 250 pas, max 60). Pas de limite ici : vas-y, casse la jauge.</div>
     ${GAUGE.map(g=>`<div class="th-row"><span style="font-size:24px">${g.e}</span><b class="grow" style="color:${g.c}">${g.n}</b><span class="mut small">${g.min?`dès ${g.min} pts`:"0 pt"}</span></div>`).join("")}
     <button class="btn sec" style="margin-top:14px" onclick="closeModal()">Fermer</button>`);
 }
@@ -674,11 +688,12 @@ function queueWrite(key,ref,getData,delay){
 function flushWrites(){ Object.values(writers).forEach(w=>{ if(w.pending){ clearTimeout(w.t); const g=w.pending; w.pending=null; g(); } }); }
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ LS.save(); flushWrites(); } });
 window.addEventListener("pagehide",()=>{ LS.save(); flushWrites(); });
-function metaData(){ return {weights:S.weights,custom:S.custom,current:S.current,profile:S.profile,foods:S.foods,templates:S.templates,seen:S.seen,settings:S.settings,myFoods:S.myFoods||[],rankV:S.rankV,seenLvl:S.seenLvl,gauge:S.gauge,u:S.u||0}; }
+function metaData(){ return {weights:S.weights,custom:S.custom,current:S.current,profile:S.profile,foods:S.foods,templates:S.templates,seen:S.seen,settings:S.settings,myFoods:S.myFoods||[],steps:S.steps||{},rankV:S.rankV,seenLvl:S.seenLvl,gauge:S.gauge,u:S.u||0}; }
 function mergeState(d){
   S=Object.assign(S,d,{profile:Object.assign({},S.profile,d.profile||{}),settings:Object.assign({},S.settings,d.settings||{})});
   ["sessions","weights","custom","foods","templates","myFoods"].forEach(k=>{ if(!Array.isArray(S[k])) S[k]=[]; });
   if(!S.days||typeof S.days!=="object") S.days={}; if(!S.seen||typeof S.seen!=="object") S.seen={};
+  if(!S.steps||typeof S.steps!=="object") S.steps={};
 }
 async function initStore(){
   const local=LS.load();
@@ -756,7 +771,9 @@ function calc(goalKey){
 function dayTotals(k,meal){ const it=(S.days[k]||[]).filter(x=>!meal||(x.m||"snack")===meal); const sum=f=>it.reduce((a,x)=>a+num(x[f]),0); return {kcal:sum("k"),p:sum("p"),c:sum("c"),f:sum("f"),n:it.length}; }
 
 /* ---- Rangs ---- */
+function stepsAvg7(){ const v=[]; for(let i=0;i<7;i++){ const d=new Date(); d.setDate(d.getDate()-i); const n=num((S.steps||{})[todayKey(d)]); if(n>0) v.push(n); } return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0; }
 function catScore(cat){
+  if(cat.special==="steps"){ const has=Object.values(S.steps||{}).some(n=>num(n)>0); return {score:stepsAvg7(),has}; }
   if(cat.special==="regu"){ const n=S.sessions.filter(s=>s.date>Date.now()-30*864e5).length; return {score:n,has:S.sessions.length>0}; }
   let best=0, has=false;
   for(const s of S.sessions) for(const e of s.exercises){
@@ -778,9 +795,19 @@ function stepThs(c){
 }
 function stepOf(score,c){ const st=stepThs(c); let k=-1; st.forEach((v,i)=>{ if(score>=v) k=i; }); return k; }
 function rankName(step){ return step<0?"Non classé":TIERS[Math.floor(step/3)].n+" "+DIVS[step%3]; }
-function allRanks(){ const o={}; CATS.forEach(c=>{ const s=catScore(c); const step=s.has?stepOf(s.score,c):-1; o[c.id]={...s,step,tier:step<0?-1:Math.floor(step/3),div:step<0?0:step%3}; }); return o; }
-function globalRank(r){ const v=CATS.map(c=>r[c.id]).filter(x=>x.step>=0); if(!v.length) return {tier:-1,step:-1,n:0,power:0}; const avg=v.reduce((a,x)=>a+x.step,0)/v.length, step=Math.floor(avg+.0001); return {step,tier:Math.floor(step/3),div:step%3,avg,n:v.length,power:v.reduce((a,x)=>a+(x.step+1)*100,0)}; }
-function migrateRanks(){ if(S.rankV===2) return; const r=allRanks(); Object.keys(S.seen||{}).forEach(id=>{ if(r[id]) S.seen[id]=r[id].step; }); S.rankV=2; }
+function allRanks(){ const o={}, mk=(s,c)=>{ const step=s.has?stepOf(s.score,c):-1; return {...s,step,tier:step<0?-1:Math.floor(step/3),div:step<0?0:step%3}; };
+  CATS.filter(c=>!c.composite).forEach(c=>{ o[c.id]=mk(catScore(c),c); });
+  // rang composé : moyenne des sous-rangs (un sous-rang vide compte 0)
+  CATS.filter(c=>c.composite).forEach(c=>{ const subs=c.composite.map(id=>o[id]); const has=subs.some(x=>x.step>=0); const score=Math.round(subs.reduce((a,x)=>a+(x.step+1),0)/subs.length*10)/10; o[c.id]=mk({score,has},c); });
+  return o; }
+function topCats(){ return CATS.filter(c=>!c.parent); }
+function globalRank(r){ const v=topCats().map(c=>({...r[c.id],w:c.w||1})).filter(x=>x.step>=0); if(!v.length) return {tier:-1,step:-1,n:0,power:0}; const W=v.reduce((a,x)=>a+x.w,0), avg=v.reduce((a,x)=>a+x.step*x.w,0)/W, step=Math.floor(avg+.0001); return {step,tier:Math.floor(step/3),div:step%3,avg,n:v.length,power:Math.round(v.reduce((a,x)=>a+(x.step+1)*100*x.w,0))}; }
+function migrateRanks(){
+  if(S.rankV===3) return; const r=allRanks();
+  if(S.rankV!==2){ Object.keys(S.seen||{}).forEach(id=>{ if(r[id]) S.seen[id]=r[id].step; }); }
+  // v3 : l'ancien rang « Bras » devient le sous-rang Biceps, le nouveau Bras est composé
+  if(S.seen&&S.seen.bras!==undefined){ S.seen.biceps=S.seen.bras; if(r.bras.step>=0) S.seen.bras=r.bras.step; else delete S.seen.bras; if(r.avantbras.step>=0) S.seen.avantbras=r.avantbras.step; }
+  S.rankV=3; }
 let embN=0;
 const RANK_STYLES={
   hex:{l:"Hexagone",o:"M50,6 L88,28 L88,72 L50,94 L12,72 L12,28Z",i:"M50,16 L79,33 L79,67 L50,84 L21,67 L21,33Z",g:"M50,6 L88,28 L50,50 L12,28Z"},
@@ -974,7 +1001,7 @@ const EXM={
   "JM press":{triceps:1,pecs:.4,epaules:.2},"Tate press":{triceps:1,pecs:.2},"Pompes triceps (coudes serrés)":{triceps:.9,pecs:.6,epaules:.3,abdos:.3},"Développé serré":{triceps:1,pecs:.6,epaules:.3},
   "Rowing barre":{dorsaux:1,trapezes:.6,biceps:.5,lombaires:.4,epaules:.3},"Rowing un bras":{dorsaux:1,biceps:.5,trapezes:.4,epaules:.2},
   "Tractions":{dorsaux:1,biceps:.6,trapezes:.3,avbras:.3,abdos:.2},"Soulevé de terre":{lombaires:1,fessiers:.9,ischios:.8,trapezes:.5,avbras:.5,quadri:.4,dorsaux:.3},
-  "Pull-over":{dorsaux:.8,pecs:.6,triceps:.3},"Curl barre":{biceps:1,avbras:.5},"Curl haltère":{biceps:1,avbras:.4},"Curl marteau":{biceps:.8,avbras:.8},"Shrugs":{trapezes:1,avbras:.3},
+  "Pull-over":{dorsaux:.8,pecs:.6,triceps:.3},"Curl barre":{biceps:1,avbras:.5},"Curl haltère":{biceps:1,avbras:.4},"Curl marteau":{biceps:.8,avbras:.8},"Curl inversé":{avbras:1,biceps:.5},"Curl poignets":{avbras:1},"Suspension à la barre (sec)":{avbras:1,dorsaux:.3,epaules:.2},"Shrugs":{trapezes:1,avbras:.3},
   "Squat":{quadri:1,fessiers:.8,ischios:.3,lombaires:.3,abdos:.2},"Soulevé de terre roumain":{ischios:1,fessiers:.8,lombaires:.6,avbras:.3},"Fentes":{quadri:1,fessiers:.8,ischios:.3,mollets:.2},
   "Hip thrust":{fessiers:1,ischios:.5,quadri:.2},"Split squat bulgare":{quadri:1,fessiers:.9,ischios:.3},"Mollets debout":{mollets:1},"Good morning":{ischios:1,lombaires:.8,fessiers:.6},
   "Gainage (sec)":{abdos:1,obliques:.5,epaules:.2,lombaires:.2},"Crunch":{abdos:1,obliques:.3},"Relevés de jambes":{abdos:1,obliques:.3},"Ab wheel":{abdos:1,obliques:.3,dorsaux:.3,epaules:.2},
@@ -997,7 +1024,7 @@ const IDEAL={fullbody:{push:.27,pull:.27,legs:.33,core:.13},hypertrophie:{push:.
   cardio:{push:.2,pull:.15,legs:.4,core:.25},street:{push:.35,pull:.35,legs:.15,core:.15}};
 const COVER={fullbody:10,hypertrophie:9,force:8,push:3,pull:3,haut:6,bas:4,cardio:8,street:8};
 const VOLR={cardio:[12,30],force:[10,22],street:[14,32]};
-const ISO=new Set(["Curl barre","Curl haltère","Curl marteau","Élévations latérales","Extension triceps barre (skull crusher)","Extension nuque (haltère)","Extension nuque (barre)","Extension couchée haltères","Kickback haltère","Extension triceps poulie (corde)","Pushdown barre (poulie)","Extension un bras (poulie)","Tate press","Shrugs","Mollets debout","Crunch","Hollow body (sec)"]);
+const ISO=new Set(["Curl barre","Curl haltère","Curl marteau","Curl inversé","Curl poignets","Élévations latérales","Extension triceps barre (skull crusher)","Extension nuque (haltère)","Extension nuque (barre)","Extension couchée haltères","Kickback haltère","Extension triceps poulie (corde)","Pushdown barre (poulie)","Extension un bras (poulie)","Tate press","Shrugs","Mollets debout","Crunch","Hollow body (sec)"]);
 function isCompound(n){ const m=EXM[n]; return !!m&&!ISO.has(n)&&Object.values(m).filter(v=>v>=.5).length>=2; }
 function exFit(n,ty){
   const m=EXM[n]; if(!m) return .5;
@@ -1183,7 +1210,7 @@ function floatXP(el,txt){
 function allTemplates(){ return [...S.templates.map(t=>({...t,mine:true})),...BUILTIN]; }
 function diffBadge(d){ if(!d) return ""; const D=DIFF[d]; return `<span class="diff" style="--dc:${D.c}"><span class="pips">${[1,2,3,4,5].map(i=>`<b class="${i<=d?"f":""}"></b>`).join("")}</span>${D.n}</span>`; }
 function progCard(t){ return `<button class="prog-card" style="${t.d?`--dc:${DIFF[t.d].c}`:""}" onclick="startFrom('${t.id}')"><span class="tag" style="${t.d?`color:${DIFF[t.d].c}`:""}">${t.mine?"Perso":esc(t.tag)}</span><b>${esc(t.name)}</b><span>${t.ex.slice(0,3).map(e=>esc(e[0])).join(" · ")}${t.ex.length>3?` +${t.ex.length-3}`:""}</span>${diffBadge(t.d)}</button>`; }
-function homeLayout(){ const h=S.settings.home||HOME_DEFAULT; const order=[...h.order.filter(k=>HOME_BLOCKS[k]),...Object.keys(HOME_BLOCKS).filter(k=>!h.order.includes(k))]; const hidden=h.hidden?[...h.hidden]:[]; Object.keys(HOME_BLOCKS).forEach(k=>{ if(!h.order.includes(k)&&!hidden.includes(k)) hidden.push(k); }); return {order,hidden}; }
+function homeLayout(){ const h=S.settings.home||HOME_DEFAULT; const order=[...h.order.filter(k=>HOME_BLOCKS[k]),...Object.keys(HOME_BLOCKS).filter(k=>!h.order.includes(k))]; const hidden=h.hidden?[...h.hidden]:[]; Object.keys(HOME_BLOCKS).forEach(k=>{ if(!h.order.includes(k)&&!hidden.includes(k)&&HOME_DEFAULT.hidden.includes(k)) hidden.push(k); }); return {order,hidden}; }
 function viewHome(){
   window.__xpPer=computeXP().per;
   const c=calc(), t=dayTotals(todayKey()), g=globalRank(allRanks());
@@ -1211,6 +1238,11 @@ function viewHome(){
     quick:()=>`<div class="qa">
       <button class="main" onclick="go('seance')"><span>🏋️</span>S'entraîner<small>Programmes & séance</small></button>
       ${last?`<button onclick="repeatLast()"><span>↻</span>Refaire<small>${esc(last.name)}</small></button>`:`<button onclick="startWorkout()"><span>⚡</span>Séance libre<small>Exos au choix</small></button>`}</div>`,
+    steps:()=>{ const goal=num(S.settings.stepGoal)||10000, n=num((S.steps||{})[k]); const bars=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const v=num((S.steps||{})[todayKey(d)]); bars.push({v,l:"LMMJVSD"[(d.getDay()+6)%7],today:i===0}); } const mx=Math.max(goal,...bars.map(b=>b.v));
+      return `<div class="card"><div class="row"><span style="font-size:26px">👟</span><div class="grow"><div class="small mut">Pas aujourd'hui</div><div style="font-size:24px;font-weight:900"><span data-count="${n}">${fr(n)}</span> <span class="small mut" style="font-weight:600">/ ${fr(goal)}</span></div></div><button class="btn sm" onclick="stepsBox()">${n?"Modifier":"＋ Noter"}</button></div>
+        <div class="bar"><i style="width:${Math.min(100,n/goal*100)}%;${n>=goal?"background:#3ddc84":""}"></i></div>
+        <div class="steps-bars">${bars.map(b=>`<div class="${b.v>=goal?"ok":""}"><i style="height:${Math.max(3,b.v/mx*44)}px;${b.today&&b.v<goal?"background:color-mix(in srgb,var(--acc) 55%,var(--line))":""}"></i>${b.l}</div>`).join("")}</div>
+        <div class="small mut" style="margin-top:8px">${n?`+${Math.min(60,Math.round(n/250))} pts de jauge · +${Math.min(20,Math.floor(n/500))} XP`:"Les pas boostent un peu ta jauge et ton XP"}${n>=goal?" · 🎯 Objectif atteint !":""}</div></div>`; },
     stats:()=>{ const n7=S.sessions.filter(s=>s.date>Date.now()-7*864e5).length; return `<div class="stats"><div class="stat"><b data-count="${n7}">${n7}</b><span>séances / 7 j</span></div><div class="stat"><b>${streakWeeks()}</b><span>sem. d'affilée</span></div><button class="stat" onclick="progSeg='poids';go('prog')"><b>${w!=null?fr1(w):"—"}</b><span>kg</span></button></div>`; },
     week:()=>`<div class="card"><div class="row" style="margin-bottom:12px"><b class="grow">Cette semaine</b><span class="small mut">${nWeek} séance${nWeek>1?"s":""} · ${streakWeeks()} sem. d'affilée 🔥</span></div>
       <div class="week">${days.map((d,i)=>`<div class="wd ${d.on?"on":""} ${d.today?"today":""}" style="--d:${i};${d.fut?"opacity:.45":""}"><i>${d.on?"✓":""}</i>${d.l}</div>`).join("")}</div></div>`,
@@ -1364,10 +1396,10 @@ function viewRangs(){
   if(rangsSeg==="potes") return header("Rangs")+seg+viewPotes();
   return header("Rangs")+seg+xpCard(false)+hero+`
   ${unseen.length?`<button class="btn" style="margin-bottom:12px" onclick="revealAll()">✨ Révéler ${unseen.length} rang${unseen.length>1?"s":""}</button>`:""}
-  <div class="rk-grid">${CATS.map(c=>rankCard(c,r[c.id])).join("")}</div>
+  <div class="rk-grid">${topCats().map(c=>rankCard(c,r[c.id],r)).join("")}</div>
   <div class="note" style="text-align:center">Rangs : ${TIERS.map(t=>`<b style="color:${t.c}">${t.n}</b>`).join(" › ")}, chacun en 3 divisions (I › II › III).<br>Touche une catégorie pour voir les paliers. Style des emblèmes : <a style="color:var(--acc);cursor:pointer" onclick="go('reglages')">Réglages</a></div>`;
 }
-function rankCard(c,x){
+function rankCard(c,x,r){
   const mys=x.step>=0&&S.seen[c.id]===undefined;
   if(mys) return `<button class="rk-card mystery" onclick="revealOne('${c.id}')">${emblem(-1,64,true)}<div class="cat">${c.ic} ${c.name}</div><div class="tier" style="color:var(--acc)">???</div><div class="val">Touche pour révéler</div></button>`;
   const st=stepThs(c), T=x.step>=0?TIERS[x.tier]:null, nx=x.step<20?x.step+1:null;
@@ -1376,19 +1408,30 @@ function rankCard(c,x){
   return `<button class="rk-card ${x.tier>=4?"hi":""}" style="${x.tier>=4?`--tc:${TIERS[x.tier].c}`:""}" onclick="rankDetail('${c.id}')">${T?`<div class="glow" style="background:radial-gradient(circle,${T.c},transparent 60%)"></div>`:""}
     ${emblem(x.tier,64,false,x.step>=0?x.div:null)}<div class="cat">${c.ic} ${c.name}</div>
     <div class="tier" style="color:${T?T.c:"var(--mut)"}">${T?rankName(x.step):(x.has?"Non classé":"—")}</div>
-    <div class="val">${x.has?`${fr1(x.score)} ${c.unit}`:"Pas encore de données"}</div>
-    ${x.has&&nx!=null?`<div class="bar"><i style="width:${pct}%;background:${TIERS[Math.floor(nx/3)].c}"></i></div><div class="val" style="font-size:11px;margin-top:4px">${rankName(nx)} à ${fr1(hi)}</div>`:""}
+    ${c.composite&&r?`<div class="subranks">${c.composite.map(id=>{ const sc=CATS.find(k=>k.id===id), sx=r[id]; return `<div title="${sc.name}">${emblem(sx.tier,24,false,null)}<span style="color:${sx.tier>=0?TIERS[sx.tier].c:"var(--mut)"}">${sc.name}</span></div>`; }).join("")}</div>`
+      :`<div class="val">${x.has?`${c.special==="steps"?fr(x.score):fr1(x.score)} ${c.unit}`:"Pas encore de données"}</div>`}
+    ${x.has&&nx!=null?`<div class="bar"><i style="width:${pct}%;background:${TIERS[Math.floor(nx/3)].c}"></i></div><div class="val" style="font-size:11px;margin-top:4px">${rankName(nx)} ${c.composite?"bientôt":"à "+(c.special==="steps"?fr(hi):fr1(hi))}</div>`:""}
+    ${c.special==="steps"&&!x.has?`<div class="val" style="font-size:11px;margin-top:4px;color:var(--acc)">Note tes pas à l'accueil</div>`:""}
   </button>`;
 }
 function rankDetail(id){
-  const c=CATS.find(x=>x.id===id), x=allRanks()[id], st=stepThs(c);
-  const srcs=c.special?"Compte toutes tes séances terminées.":"Exos comptés : "+c.src.map(s=>esc(s[0])+(s[2]!==1?` (×${String(s[2]).replace(".",",")})`:"")).join(", ");
+  const c=CATS.find(x=>x.id===id), R=allRanks(), x=R[id], st=stepThs(c);
+  if(c.composite) return compositeDetail(c,R);
+  const srcs=c.special==="steps"?`<a style="color:var(--acc);cursor:pointer" onclick="closeModal();stepsBox()">＋ Noter mes pas</a>`:c.special?"Compte toutes tes séances terminées.":"Exos comptés : "+c.src.map(s=>esc(s[0])+(s[2]!==1?` (×${String(s[2]).replace(".",",")})`:"")).join(", ");
   modal(`<div class="row" style="margin-bottom:10px">${emblem(x.tier,72,false,x.step>=0?x.div:null)}<div class="grow"><div class="small mut" style="font-weight:800">${c.ic} ${c.name.toUpperCase()}</div><div style="font-size:24px;font-weight:900;color:${x.tier>=0?TIERS[x.tier].c:"var(--mut)"}">${rankName(x.step)}</div><div class="small mut">${x.has?`Ton record : <b style="color:var(--txt)">${fr1(x.score)} ${c.unit}</b>`:"Pas encore de données"}</div></div></div>
     <div class="small mut" style="margin-bottom:10px">${c.desc}. ${srcs}</div>
     ${TIERS.map((t,i)=>`<div class="th-row ${i===x.tier?"cur":""}">${emblem(i,30)}<b style="color:${t.c};min-width:72px">${t.n}</b>
       <div class="grow row" style="gap:6px;justify-content:flex-end">${[0,1,2].map(d=>{ const k=i*3+d, ok=x.score>=st[k]; return `<span class="small" style="text-align:center;min-width:52px;${k===x.step?`color:${t.c};font-weight:900`:ok?"":"opacity:.45"}"><span style="font-size:10px;display:block;font-weight:800">${DIVS[d]}</span>${fr1(st[k])}</span>`; }).join("")}</div></div>`).slice().reverse().join("")}
     <div class="small mut" style="text-align:right;margin-top:6px">en ${c.unit}</div>
     <button class="btn sec" style="margin-top:14px" onclick="closeModal()">Fermer</button>`);
+}
+function compositeDetail(c,R){
+  const x=R[c.id];
+  modal(`<div class="row" style="margin-bottom:12px">${emblem(x.tier,72,false,x.step>=0?x.div:null)}<div class="grow"><div class="small mut" style="font-weight:800">${c.ic} ${c.name.toUpperCase()}</div><div style="font-size:24px;font-weight:900;color:${x.tier>=0?TIERS[x.tier].c:"var(--mut)"}">${rankName(x.step)}</div><div class="small mut">${c.desc}.</div></div></div>
+    ${c.composite.map(id=>{ const sc=CATS.find(k=>k.id===id), sx=R[id]; return `<button class="card row" style="width:100%;text-align:left;margin-bottom:8px" onclick="rankDetail('${id}')">${emblem(sx.tier,44,false,sx.step>=0?sx.div:null)}<div class="grow"><b>${sc.ic} ${sc.name}</b><div class="small" style="color:${sx.tier>=0?TIERS[sx.tier].c:"var(--mut)"};font-weight:800">${rankName(sx.step)}</div><div class="small mut">${sx.has?`${fr1(sx.score)} ${sc.unit}`:"Pas encore de données"}</div></div><b class="mut">${sx.step+1}/21</b></button>`; }).join("")}
+    <div class="macro" style="text-align:center;margin-top:4px"><b>${c.composite.map(id=>R[id].step+1).join(" + ")} = ${c.composite.reduce((a,id)=>a+R[id].step+1,0)} pts</b><span>÷ 3 = ${fr1(x.score)} → ${rankName(x.step)}</span></div>
+    <div class="note">Chaque sous-rang vaut de 0 (non classé) à 21 points (Légende III). Leur moyenne donne ton rang Bras : travaille les trois pour monter !</div>
+    <button class="btn sec" style="margin-top:12px" onclick="closeModal()">Fermer</button>`);
 }
 function revealOne(id){ const x=allRanks()[id]; playRanks([{id,from:null,to:x.step,score:x.score}]); }
 function revealAll(){ const r=allRanks(); playRanks(CATS.filter(c=>r[c.id].step>=0&&S.seen[c.id]===undefined).map(c=>({id:c.id,from:null,to:r[c.id].step,score:r[c.id].score}))); }
@@ -1759,6 +1802,29 @@ function viewSettings(){
   return subHeader("Réglages",prevTab)+`<div class="hscroll" style="margin-bottom:4px">${tabs.map(([k,l])=>`<button class="chip ${setTab===k?"on":""}" style="flex:none;padding:8px 14px" onclick="setTab='${k}';animateNext=true;render()">${l}</button>`).join("")}</div>`
     +({look,home,ranks,general}[setTab]||look);
 }
+function stepsBox(dayOffset){
+  const off=dayOffset||0, d=new Date(); d.setDate(d.getDate()-off); const k=todayKey(d), cur=num((S.steps||{})[k]);
+  modal(`<h3>👟 Mes pas</h3>
+    <div class="seg" style="margin-bottom:12px">${[[0,"Aujourd'hui"],[1,"Hier"],[2,"Avant-hier"]].map(([o,l])=>`<button class="${off===o?"on":""}" onclick="stepsBox(${o})">${l}</button>`).join("")}</div>
+    <input id="stIn" class="field" inputmode="numeric" placeholder="ex. 8500" value="${cur||""}" style="text-align:center;font-size:26px;font-weight:900" onkeydown="if(event.key==='Enter')saveSteps('${k}')">
+    <div class="chips" style="margin:-2px 0 12px">${[1000,2500,5000].map(v=>`<button class="chip" onclick="const i=$('#stIn');i.value=num(i.value)+${v}">+${fr(v)}</button>`).join("")}</div>
+    <div class="small mut" style="margin-bottom:12px">Recopie le nombre affiché par ton téléphone ou ta montre (appli Santé, Google Fit…).</div>
+    <label class="l">Objectif quotidien</label>
+    <div class="seg" style="margin-bottom:14px">${[6000,8000,10000,12000,15000].map(g=>`<button class="${(num(S.settings.stepGoal)||10000)===g?"on":""}" onclick="S.settings.stepGoal=${g};saveMeta();stepsBox(${off})">${fr(g/1000)}k</button>`).join("")}</div>
+    <button class="btn" onclick="saveSteps('${k}')">Enregistrer</button>`);
+  setTimeout(()=>{ const i=$("#stIn"); if(i) i.focus(); },120);
+}
+function saveSteps(k){
+  const v=Math.round(num($("#stIn").value)); if(v<0||v>100000){ toast("Nombre de pas invalide"); return; }
+  const before=gaugeOf(todayScore().sc).t;
+  S.steps=S.steps||{}; if(v) S.steps[k]=v; else delete S.steps[k];
+  saveMeta(); closeModal(); haptic(15);
+  const ch=rankChanges(); render();
+  const goal=num(S.settings.stepGoal)||10000;
+  toast(v>=goal&&k===todayKey()?"🎯 Objectif de pas atteint !":"👟 "+fr(v)+" pas enregistrés");
+  if(v>=goal&&k===todayKey()) confetti(40);
+  if(ch.length) setTimeout(()=>playRanks(ch),500);
+}
 function applyQuickTheme(k){ const q=QUICK_THEMES[k]; Object.assign(S.settings,q.s,{qtheme:k}); applyTheme(); saveMeta(); render(); haptic(15); toast("🎨 Thème « "+q.l+" » appliqué"); }
 function resetLook(){ Object.assign(S.settings,QUICK_THEMES.rouge.s,{qtheme:null,navLabels:true,anim:"on",density:"normal",bgGrad:"flamme",bgAnim:"aurora"}); applyTheme(); saveMeta(); render(); toast("Apparence réinitialisée"); }
 function applyHomePreset(k){ const p=HOME_PRESETS[k]; const rest=Object.keys(HOME_BLOCKS).filter(x=>!p.order.includes(x)); S.settings.home={order:[...p.order,...rest],hidden:[...p.hidden,...rest]}; S.settings.gaugeSize=p.gauge||"big"; saveMeta(); render(); haptic(10); toast("🏠 Mise en page « "+p.l+" »"); }
@@ -2031,7 +2097,8 @@ async function publishStats(){
   if(store!=="sb"||!sbUser) return;
   try{
     const X=computeXP(), lv=levelOf(X.total), r=allRanks(), g=globalRank(r), mon=weekStart();
-    const xpWeek=S.sessions.filter(s=>s.date>=mon).reduce((a,s)=>a+((X.per[s.id]||{}).gain||0),0);
+    const monK=todayKey(new Date(mon));
+    const xpWeek=S.sessions.filter(s=>s.date>=mon).reduce((a,s)=>a+((X.per[s.id]||{}).gain||0),0)+Object.entries(X.stepGain||{}).filter(([k])=>k>=monK).reduce((a,[,g])=>a+g,0);
     const ranks={}; CATS.forEach(c=>ranks[c.id]=r[c.id].step);
     await sb.from("public_stats").upsert({user_id:sbUser.id,pseudo:sbProfile.pseudo,level:lv.L,xp_total:X.total,xp_week:xpWeek,week_key:todayKey(new Date(mon)),
       gauge_pts:Math.round(todayScore().sc),gauge_day:todayKey(),global_step:g.step,ranks,sessions_30:S.sessions.filter(s=>s.date>Date.now()-30*864e5).length,
