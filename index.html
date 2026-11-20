@@ -479,7 +479,7 @@ const BGS = {clair:{l:"Clair",bg:"#f3f4f7",card:"#ffffff",card2:"#eef0f4",line:"
 /* ---- Rangs ---- */
 const CLASSIC = [
   {n:"Fer",c:"#9aa0a8",c2:"#3a3d44"},{n:"Bronze",c:"#e8a06a",c2:"#7a3f17"},{n:"Argent",c:"#e6ebf2",c2:"#7d8794"},
-  {n:"Or",c:"#ffd75e",c2:"#a8740c"},{n:"Platine",c:"#6ff2df",c2:"#147a6e"},{n:"Diamant",c:"#9cc2ff",c2:"#3346c9"},{n:"Légende",c:"#ff4a5c",c2:"#6e0012"},{n:"Ultime",c:"#ff7ae0",c2:"#3a0a7a",ultime:true}
+  {n:"Or",c:"#ffd75e",c2:"#a8740c"},{n:"Platine",c:"#6ff2df",c2:"#147a6e"},{n:"Diamant",c:"#9cc2ff",c2:"#3346c9"},{n:"Légende",c:"#ff4a5c",c2:"#6e0012"},{n:"Predator",c:"#ff1f3d",c2:"#050506",ultime:true,predator:true}
 ];
 let TIERS = CLASSIC;
 // src : [exercice, type, multiplicateur]  type: e1 = 1RM estimé, reps = reps max sur une série, val = valeur brute (sec / min)
@@ -834,7 +834,8 @@ function classicEmblem(t,size,mys,div,styleKey){
   const pips=div==null?"":`<g>${[0,1,2].map(i=>{ const x=40+i*10, on=i<=div; return `<path d="M${x},74 l3.6,3.6 l-3.6,3.6 l-3.6,-3.6Z" fill="${on?"#fff":"rgba(0,0,0,.35)"}" stroke="${on?"#fff":"rgba(255,255,255,.35)"}" stroke-width="1"/>`; }).join("")}</g>`;
   const facets=ST.facets?`<g stroke="rgba(255,255,255,.28)" stroke-width="1" fill="none"><path d="M18,22 L50,40 L82,22 M10,50 L50,40 L90,50 M50,40 L50,97"/></g>`:"";
   const ribbon=ST.ribbon?`<g stroke="${T.c}" stroke-width="1.2"><path d="M30,82 L22,104 L32,99 L38,108 L44,88Z" fill="${T.c2}"/><path d="M70,82 L78,104 L68,99 L62,108 L56,88Z" fill="${T.c2}"/></g>`:"";
-  const base=`<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${T.c}"/><stop offset="1" stop-color="${T.c2}"/></linearGradient>
+  const PR=!!T.predator;
+  const base=`<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${PR?"#34353d":T.c}"/><stop offset=".55" stop-color="${PR?"#101014":T.c2}"/><stop offset="1" stop-color="${PR?"#000":T.c2}"/></linearGradient>
     <linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
     <radialGradient id="${id}a"><stop offset="0" stop-color="${T.c}" stop-opacity=".75"/><stop offset=".55" stop-color="${T.c}" stop-opacity=".18"/><stop offset="1" stop-color="${T.c}" stop-opacity="0"/></radialGradient>
     <linearGradient id="${id}w" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -862,30 +863,31 @@ function classicEmblem(t,size,mys,div,styleKey){
       ${t>=5&&!ST.ribbon?`<g fill="${T.c2}"><polygon points="30,92 22,104 40,98 50,108 60,98 78,104 70,92"/></g>`:""}</g>`;
   const gem=t===5?`<g><polygon points="50,-10 41,0 50,10 59,0" fill="${T.c}" stroke="#fff" stroke-width="1.5"/><polygon points="50,-10 45,0 50,10" fill="#fff" opacity=".35"/>
       <animateTransform attributeName="transform" type="translate" values="0 0;0 -2.5;0 0" dur="2s" repeatCount="indefinite"/></g>`:"";
-  const crown=t>=6?`<g><path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10 Z" fill="${T.c}" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+  const crown=t>=6?`<g><path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10 Z" fill="${PR?"#0b0b0d":T.c}" stroke="${PR?T.c:"#fff"}" stroke-width="1.6" stroke-linejoin="round"/>
       <circle cx="50" cy="-14" r="3" fill="#fff"/><circle cx="33" cy="-8" r="2.2" fill="#fff"/><circle cx="67" cy="-8" r="2.2" fill="#fff"/>
-      <path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10 Z" fill="${T.c}" filter="url(#${id}f)" opacity=".8"><animate attributeName="opacity" values=".2;.9;.2" dur="1.4s" repeatCount="indefinite"/></path>
+      <path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10 Z" fill="${PR?"none":T.c}" stroke="${PR?T.c:"none"}" stroke-width="2" filter="url(#${id}f)" opacity=".8"><animate attributeName="opacity" values=".2;.9;.2" dur="1.4s" repeatCount="indefinite"/></path>
       <animateTransform attributeName="transform" type="translate" values="0 0;0 -2;0 0" dur="1.8s" repeatCount="indefinite"/></g>`:"";
-  const flames=t>=6?[[-14,0],[0,.35],[14,.7]].map(([dx,d])=>`<ellipse cx="${50+dx}" cy="30" rx="16" ry="34" fill="${T.c}" filter="url(#${id}f)" opacity=".5">
+  const flames=t>=6?[[-14,0],[0,.35],[14,.7]].map(([dx,d])=>`<ellipse cx="${50+dx}" cy="30" rx="16" ry="34" fill="${PR?(dx?"#000":T.c):T.c}" filter="url(#${id}f)" opacity="${PR?(dx?.85:.6):.5}">
       <animate attributeName="ry" values="30;40;30" dur="${.9+d}s" repeatCount="indefinite"/><animate attributeName="cy" values="34;24;34" dur="${.9+d}s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values=".35;.7;.35" dur="${.9+d}s" repeatCount="indefinite"/></ellipse>`).join(""):"";
   const embers=t>=6?[0,1.2,2.4,3.6].map((b,i)=>`<circle r="${i%2?1.8:2.6}" fill="${i%2?"#fff":T.c}"><animateMotion dur="4.8s" begin="-${b}s" repeatCount="indefinite" path="M50,-6 A56,56 0 1,1 49.9,-6"/></circle>`).join(""):"";
   const shine=`<g clip-path="url(#${id}c)"><rect x="-40" y="-10" width="22" height="130" fill="url(#${id}w)" transform="skewX(-18)" opacity=".7">
       <animate attributeName="x" values="-60;-60;150" keyTimes="0;.55;1" dur="${t>=6?2.4:3.2}s" repeatCount="indefinite"/></rect></g>`;
-  const core=t>=6?`<g transform="translate(50 52)"><polygon points="0,-16 4.7,-5.6 16,-4.7 7.5,2.8 10.3,14 0,8.4 -10.3,14 -7.5,2.8 -16,-4.7 -4.7,-5.6" fill="#fff">
+  const core=PR?`<g>${[-10,0,10].map((dx,i)=>`<path d="M${44+dx},${30+i*2} Q${50+dx},${52} ${56+dx},${74-i*2}" fill="none" stroke="${T.c}" stroke-width="4.5" stroke-linecap="round" filter="url(#${id}f)"><animate attributeName="opacity" values=".5;1;.5" dur="${.9+i*.25}s" repeatCount="indefinite"/></path><path d="M${44+dx},${30+i*2} Q${50+dx},${52} ${56+dx},${74-i*2}" fill="none" stroke="#ffd0d6" stroke-width="1.6" stroke-linecap="round"/>`).join("")}</g>`
+    :t>=6?`<g transform="translate(50 52)"><polygon points="0,-16 4.7,-5.6 16,-4.7 7.5,2.8 10.3,14 0,8.4 -10.3,14 -7.5,2.8 -16,-4.7 -4.7,-5.6" fill="#fff">
       <animateTransform attributeName="transform" type="scale" values="1;1.15;1" dur="1.2s" repeatCount="indefinite"/></polygon></g>`
     :`<g>${chev}<animate attributeName="opacity" values="1;.75;1" dur="2s" repeatCount="indefinite"/></g>`;
   const innerGlow=`<path d="${ST.i}" fill="none" stroke="#fff" stroke-width="1.5" opacity=".2"><animate attributeName="opacity" values=".1;.6;.1" dur="${t>=6?1.2:2.2}s" repeatCount="indefinite"/></path>`;
   const sparks=[[-2,8,.9,0],[104,4,.8,.8],[100,92,.7,1.5],[0,96,.75,.4],...(t>=5?[[50,-18,.7,1.1],[112,52,.6,1.8]]:[]),...(t>=6?[[-14,52,.8,.6],[86,-14,.7,1.3]]:[])].map(a=>spark(...a)).join("");
   const ult=T.ultime?ultimeFX(id,T):{back:"",front:""};
   const sz=Math.round(size*(T.ultime?1.3:1.2));
-  return `<svg viewBox="-20 -26 140 140" width="${sz}" height="${sz}" class="${T.ultime?"ultime":""}" style="overflow:visible;margin:${-(sz-size)/2}px">${base}
-    ${ult.back}${aura}${flames}${ring1}${ring2}${wings}${body}${innerGlow}${shine}${core}${pips}${gem}${crown}${embers}${sparks}${ult.front}</svg>`;
+  return `<svg viewBox="-20 -26 140 140" width="${sz}" height="${sz}" class="${T.ultime&&!T.predator?"ultime":""}" style="overflow:visible;margin:${-(sz-size)/2}px">${base}
+    ${PR?aura.replace("<circle ",'<circle opacity=".45" ')+ult.back:ult.back+aura}${flames}${ring1}${ring2}${wings}${body}${innerGlow}${shine}${core}${pips}${gem}${crown}${embers}${sparks}${ult.front}</svg>`;
 }
 
 /* ---------- Thèmes de rangs complets ---------- */
 const RANK_THEMES={
-  classic:{l:"Classique",d:"Fer › Bronze › … › Légende › Ultime",tiers:CLASSIC},
+  classic:{l:"Classique",d:"Fer › Bronze › … › Légende › Predator",tiers:CLASSIC},
   belts:{l:"Ceintures",d:"Arts martiaux, de la blanche à la noire",tiers:[
     {n:"Blanche",c:"#f2f2f2",c2:"#8a8a8a",belt:"#f4f4f4",edge:"#b5b5b5",stripe:"#111"},{n:"Jaune",c:"#ffd43b",c2:"#8a6d00",belt:"#ffd43b",edge:"#c9a400",stripe:"#111"},
     {n:"Orange",c:"#ff8c2a",c2:"#8a3d00",belt:"#ff8c2a",edge:"#c86410",stripe:"#111"},{n:"Verte",c:"#35d06a",c2:"#145c2a",belt:"#2fbf5b",edge:"#1d8a3e",stripe:"#111"},
@@ -906,7 +908,19 @@ const RANK_THEMES={
 };
 function curTheme(k){ return RANK_THEMES[k||S.settings.rankTheme]||RANK_THEMES.classic; }
 // Effets supplémentaires du rang Ultime (tous thèmes)
+function predatorFX(id,T){
+  const smoke=[[-16,0,22],[18,.7,20],[0,1.4,26]].map(([dx,d,r])=>`<circle cx="${50+dx}" cy="${48}" r="${r}" fill="#000" filter="url(#${id}f)" opacity=".75"><animate attributeName="cy" values="52;40;52" dur="${3+d}s" repeatCount="indefinite"/><animate attributeName="r" values="${r};${r+8};${r}" dur="${3+d}s" repeatCount="indefinite"/></circle>`).join("");
+  const spikes=Array.from({length:16},(_,i)=>{ const a=i*Math.PI/8, r1=56, r2=i%2?66:72, w=.09; const P=(r,aa)=>`${(50+r*Math.cos(aa)).toFixed(1)},${(50+r*Math.sin(aa)).toFixed(1)}`; return `<path d="M${P(r1,a-w)} L${P(r2,a)} L${P(r1,a+w)}Z" fill="#0a0a0c" stroke="${T.c}" stroke-width=".8"/>`; }).join("");
+  const bolt=(rot,dl)=>`<g transform="rotate(${rot} 50 50)"><path d="M50,-8 L46,4 L52,4 L47,16" fill="none" stroke="#ff5a6e" stroke-width="2" stroke-linejoin="round" opacity="0" filter="url(#${id}f)"><animate attributeName="opacity" values="0;0;1;0;1;0" keyTimes="0;.7;.75;.8;.85;1" dur="2.6s" begin="${dl}s" repeatCount="indefinite"/></path><path d="M50,-8 L46,4 L52,4 L47,16" fill="none" stroke="#fff" stroke-width=".9" stroke-linejoin="round" opacity="0"><animate attributeName="opacity" values="0;0;1;0;1;0" keyTimes="0;.7;.75;.8;.85;1" dur="2.6s" begin="${dl}s" repeatCount="indefinite"/></path></g>`;
+  const back=`${smoke}<g>${spikes}<animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="24s" repeatCount="indefinite"/></g>
+    <circle cx="50" cy="50" r="60" fill="none" stroke="${T.c}" stroke-width="1.2" opacity=".8"><animate attributeName="stroke-opacity" values=".3;1;.3" dur="1.6s" repeatCount="indefinite"/></circle>`;
+  const embers=[0,1.2,2.4,3.6,4.8].map((b,i)=>`<circle r="${i%2?1.6:2.4}" fill="${i%2?"#ff8a95":T.c}" filter="url(#${id}f)"><animateMotion dur="6s" begin="-${b}s" repeatCount="indefinite" path="M50,-12 A62,62 0 1,0 49.9,-12"/></circle>`).join("");
+  const front=`${bolt(-35,0)}${bolt(40,.9)}${bolt(160,1.7)}${embers}
+    <path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10" fill="none" stroke="${T.c}" stroke-width="2.2" filter="url(#${id}f)"><animate attributeName="opacity" values=".3;1;.3" dur="1.3s" repeatCount="indefinite"/></path>`;
+  return {back,front};
+}
 function ultimeFX(id,T){
+  if(T.predator) return predatorFX(id,T);
   const rays=Array.from({length:12},(_,i)=>`<path d="M50,50 L${(50+70*Math.cos(i*Math.PI/6-.06)).toFixed(1)},${(50+70*Math.sin(i*Math.PI/6-.06)).toFixed(1)} L${(50+70*Math.cos(i*Math.PI/6+.06)).toFixed(1)},${(50+70*Math.sin(i*Math.PI/6+.06)).toFixed(1)}Z" fill="${i%2?T.c:"#fff"}" opacity=".18"/>`).join("");
   const back=`<g>${rays}<animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="16s" repeatCount="indefinite"/></g>
     <circle cx="50" cy="50" r="62" fill="none" stroke="${T.c}" stroke-width="2.5" stroke-dasharray="2 5" opacity=".9"><animateTransform attributeName="transform" type="rotate" from="360 50 50" to="0 50 50" dur="7s" repeatCount="indefinite"/></circle>`;
