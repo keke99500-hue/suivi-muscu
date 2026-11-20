@@ -352,7 +352,7 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 /* ================= Données de base ================= */
 const PRESETS = {
   "Pecs / Épaules / Triceps":["Développé couché","Développé incliné","Développé militaire","Élévations latérales","Pompes","Dips","Extension triceps barre (skull crusher)","Développé serré","Extension nuque (haltère)","Extension nuque (barre)","Extension couchée haltères","Kickback haltère","Extension triceps poulie (corde)","Pushdown barre (poulie)","Extension un bras (poulie)","JM press","Tate press","Pompes triceps (coudes serrés)"],
-  "Dos / Biceps":["Rowing barre","Rowing un bras","Tractions","Soulevé de terre","Pull-over","Curl barre","Curl haltère","Curl marteau","Curl inversé","Curl poignets","Suspension à la barre (sec)","Shrugs"],
+  "Dos / Biceps":["Rowing barre","Rowing un bras","Tractions","Tirage vertical (prise large)","Tirage vertical (prise serrée)","Tirage vertical (supination)","Tirage vertical unilatéral","Tirage horizontal (poulie)","Tirage bras tendus (poulie)","Soulevé de terre","Pull-over","Curl barre","Curl haltère","Curl marteau","Curl inversé","Curl poignets","Suspension à la barre (sec)","Shrugs"],
   "Jambes":["Squat","Soulevé de terre roumain","Fentes","Hip thrust","Split squat bulgare","Mollets debout","Good morning"],
   "Street workout":["Tractions australiennes","Tractions supination (chin-up)","Tractions lestées","Muscle-up","Dips sur banc","Dips lestés","Pompes diamant","Pompes déclinées","Pompes archer","Pompes claquées","Pike push-up","Handstand push-up","Squat sauté","Pistol squat","Relevés de jambes à la barre","Toes to bar","Dragon flag","L-sit (sec)","Hollow body (sec)","Front lever tuck (sec)","Front lever (sec)","Planche tuck (sec)","Planche (sec)","Mountain climbers"],
   "Abdos / Cardio":["Gainage (sec)","Crunch","Relevés de jambes","Ab wheel","Corde à sauter (min)","Burpees"]
@@ -487,7 +487,7 @@ const CATS = [
   {id:"triceps",parent:"bras",name:"Triceps",ic:"🔱",unit:"kg",desc:"1RM estimé à l'extension barre",src:[["Extension triceps barre (skull crusher)","e1",1],["Extension nuque (barre)","e1",1],["JM press","e1",.8],["Développé serré","e1",.55],["Extension couchée haltères","e1",1.6],["Extension nuque (haltère)","e1",1.1],["Pushdown barre (poulie)","e1",.75],["Extension triceps poulie (corde)","e1",.7]],th:[10,15,22,30,40,50,62]},
   {id:"pecs",name:"Pecs",ic:"🛡️",unit:"kg",desc:"1RM estimé au développé couché",src:[["Développé couché","e1",1],["Développé incliné","e1",1.15]],th:[30,45,60,80,100,120,145]},
   {id:"epaules",name:"Épaules",ic:"🏔️",unit:"kg",desc:"1RM estimé au développé militaire",src:[["Développé militaire","e1",1]],th:[20,30,40,52,65,80,95]},
-  {id:"dos",name:"Dos",ic:"🦅",unit:"kg",desc:"1RM estimé au rowing",src:[["Rowing barre","e1",1],["Rowing un bras","e1",1.8]],th:[30,45,60,78,95,115,135]},
+  {id:"dos",name:"Dos",ic:"🦅",unit:"kg",desc:"1RM estimé au rowing ou au tirage (vertical / horizontal)",src:[["Rowing barre","e1",1],["Rowing un bras","e1",1.8],["Tirage vertical (prise large)","e1",.95],["Tirage vertical (prise serrée)","e1",.95],["Tirage vertical (supination)","e1",.95],["Tirage horizontal (poulie)","e1",.9],["Tirage vertical unilatéral","e1",1.8]],th:[30,45,60,78,95,115,135]},
   {id:"jambes",name:"Jambes",ic:"🦵",unit:"kg",desc:"1RM estimé au squat",src:[["Squat","e1",1],["Split squat bulgare","e1",1.8]],th:[40,60,80,105,130,160,190]},
   {id:"force",name:"Force brute",ic:"⚒️",unit:"kg",desc:"1RM estimé au soulevé de terre",src:[["Soulevé de terre","e1",1],["Soulevé de terre roumain","e1",1.25]],th:[50,75,100,130,160,190,225]},
   {id:"tractions",name:"Tractions",ic:"🧗",unit:"reps",desc:"Max de tractions en une série",src:[["Tractions","reps",1],["Tractions supination (chin-up)","reps",.9],["Tractions lestées","reps",1.4],["Muscle-up","reps",3]],th:[1,4,7,10,14,18,25]},
@@ -507,7 +507,7 @@ const EX_COEF = {
   "Squat":1.6,"Soulevé de terre":1.6,"Burpees":1.6,"Tractions":1.6,"Corde à sauter (min)":1.5,"Split squat bulgare":1.5,
   "Développé couché":1.4,"Développé militaire":1.4,"Rowing barre":1.4,"Fentes":1.4,"Soulevé de terre roumain":1.4,"Hip thrust":1.3,"Dips":1.4,"Good morning":1.3,"Développé incliné":1.4,
   "Muscle-up":2.1,"Handstand push-up":1.9,"Planche (sec)":2.2,"Planche tuck (sec)":1.7,"Front lever (sec)":2,"Front lever tuck (sec)":1.6,"Pistol squat":1.7,"Tractions lestées":1.8,"Dips lestés":1.6,"Tractions supination (chin-up)":1.6,"Dragon flag":1.6,"Toes to bar":1.5,"Pompes claquées":1.5,"Pompes archer":1.45,"Squat sauté":1.4,"L-sit (sec)":1.4,"Pike push-up":1.3,"Relevés de jambes à la barre":1.3,"Mountain climbers":1.2,"Pompes diamant":1.2,"Pompes déclinées":1.2,"Tractions australiennes":1.1,"Dips sur banc":1,"Hollow body (sec)":1,
-  "Pompes":1.15,"Rowing un bras":1.15,"Développé serré":1.2,"Pull-over":1.1,"Ab wheel":1.1,
+  "Pompes":1.15,"Rowing un bras":1.15,"Développé serré":1.2,"Pull-over":1.1,"Tirage vertical (prise large)":1.2,"Tirage vertical (prise serrée)":1.2,"Tirage vertical (supination)":1.2,"Tirage vertical unilatéral":1.05,"Tirage horizontal (poulie)":1.2,"Tirage bras tendus (poulie)":.85,"Ab wheel":1.1,
   "Curl barre":.85,"Curl haltère":.8,"Curl marteau":.8,"Curl inversé":.75,"Curl poignets":.6,"Suspension à la barre (sec)":.8,"Élévations latérales":.8,"Extension triceps barre (skull crusher)":.85,"Extension nuque (haltère)":.8,"Extension nuque (barre)":.85,"Extension couchée haltères":.8,"Kickback haltère":.7,"Extension triceps poulie (corde)":.75,"Pushdown barre (poulie)":.75,"Extension un bras (poulie)":.7,"JM press":1.05,"Tate press":.8,"Pompes triceps (coudes serrés)":1.15,"Shrugs":.75,"Mollets debout":.75,"Crunch":.7,"Relevés de jambes":.8,"Gainage (sec)":.9
 };
 const coefOf = n => EX_COEF[n] ?? 1;
@@ -1001,7 +1001,9 @@ const EXM={
   "JM press":{triceps:1,pecs:.4,epaules:.2},"Tate press":{triceps:1,pecs:.2},"Pompes triceps (coudes serrés)":{triceps:.9,pecs:.6,epaules:.3,abdos:.3},"Développé serré":{triceps:1,pecs:.6,epaules:.3},
   "Rowing barre":{dorsaux:1,trapezes:.6,biceps:.5,lombaires:.4,epaules:.3},"Rowing un bras":{dorsaux:1,biceps:.5,trapezes:.4,epaules:.2},
   "Tractions":{dorsaux:1,biceps:.6,trapezes:.3,avbras:.3,abdos:.2},"Soulevé de terre":{lombaires:1,fessiers:.9,ischios:.8,trapezes:.5,avbras:.5,quadri:.4,dorsaux:.3},
-  "Pull-over":{dorsaux:.8,pecs:.6,triceps:.3},"Curl barre":{biceps:1,avbras:.5},"Curl haltère":{biceps:1,avbras:.4},"Curl marteau":{biceps:.8,avbras:.8},"Curl inversé":{avbras:1,biceps:.5},"Curl poignets":{avbras:1},"Suspension à la barre (sec)":{avbras:1,dorsaux:.3,epaules:.2},"Shrugs":{trapezes:1,avbras:.3},
+  "Pull-over":{dorsaux:.8,pecs:.6,triceps:.3},
+  "Tirage vertical (prise large)":{dorsaux:1,biceps:.5,trapezes:.3,epaules:.2},"Tirage vertical (prise serrée)":{dorsaux:1,biceps:.6,trapezes:.3},"Tirage vertical (supination)":{dorsaux:.9,biceps:.8,avbras:.2},"Tirage vertical unilatéral":{dorsaux:1,biceps:.5,obliques:.2},
+  "Tirage horizontal (poulie)":{dorsaux:1,trapezes:.6,biceps:.5,epaules:.3,lombaires:.2},"Tirage bras tendus (poulie)":{dorsaux:1,triceps:.2,abdos:.2},"Curl barre":{biceps:1,avbras:.5},"Curl haltère":{biceps:1,avbras:.4},"Curl marteau":{biceps:.8,avbras:.8},"Curl inversé":{avbras:1,biceps:.5},"Curl poignets":{avbras:1},"Suspension à la barre (sec)":{avbras:1,dorsaux:.3,epaules:.2},"Shrugs":{trapezes:1,avbras:.3},
   "Squat":{quadri:1,fessiers:.8,ischios:.3,lombaires:.3,abdos:.2},"Soulevé de terre roumain":{ischios:1,fessiers:.8,lombaires:.6,avbras:.3},"Fentes":{quadri:1,fessiers:.8,ischios:.3,mollets:.2},
   "Hip thrust":{fessiers:1,ischios:.5,quadri:.2},"Split squat bulgare":{quadri:1,fessiers:.9,ischios:.3},"Mollets debout":{mollets:1},"Good morning":{ischios:1,lombaires:.8,fessiers:.6},
   "Gainage (sec)":{abdos:1,obliques:.5,epaules:.2,lombaires:.2},"Crunch":{abdos:1,obliques:.3},"Relevés de jambes":{abdos:1,obliques:.3},"Ab wheel":{abdos:1,obliques:.3,dorsaux:.3,epaules:.2},
@@ -1024,7 +1026,7 @@ const IDEAL={fullbody:{push:.27,pull:.27,legs:.33,core:.13},hypertrophie:{push:.
   cardio:{push:.2,pull:.15,legs:.4,core:.25},street:{push:.35,pull:.35,legs:.15,core:.15}};
 const COVER={fullbody:10,hypertrophie:9,force:8,push:3,pull:3,haut:6,bas:4,cardio:8,street:8};
 const VOLR={cardio:[12,30],force:[10,22],street:[14,32]};
-const ISO=new Set(["Curl barre","Curl haltère","Curl marteau","Curl inversé","Curl poignets","Élévations latérales","Extension triceps barre (skull crusher)","Extension nuque (haltère)","Extension nuque (barre)","Extension couchée haltères","Kickback haltère","Extension triceps poulie (corde)","Pushdown barre (poulie)","Extension un bras (poulie)","Tate press","Shrugs","Mollets debout","Crunch","Hollow body (sec)"]);
+const ISO=new Set(["Tirage bras tendus (poulie)","Curl barre","Curl haltère","Curl marteau","Curl inversé","Curl poignets","Élévations latérales","Extension triceps barre (skull crusher)","Extension nuque (haltère)","Extension nuque (barre)","Extension couchée haltères","Kickback haltère","Extension triceps poulie (corde)","Pushdown barre (poulie)","Extension un bras (poulie)","Tate press","Shrugs","Mollets debout","Crunch","Hollow body (sec)"]);
 function isCompound(n){ const m=EXM[n]; return !!m&&!ISO.has(n)&&Object.values(m).filter(v=>v>=.5).length>=2; }
 function exFit(n,ty){
   const m=EXM[n]; if(!m) return .5;
