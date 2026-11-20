@@ -338,6 +338,9 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .steps-bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mut);font-weight:700;height:100%;justify-content:flex-end}
 .steps-bars i{width:100%;border-radius:5px;background:var(--line);min-height:3px;transition:height .6s}
 .steps-bars .ok i{background:var(--acc)}
+@keyframes hueSpin{to{filter:hue-rotate(360deg) saturate(1.3)}}
+svg.ultime{animation:hueSpin 7s linear infinite}
+.reduce svg.ultime{animation:none}
 </style>
 </head>
 <body>
@@ -476,12 +479,12 @@ const BGS = {clair:{l:"Clair",bg:"#f3f4f7",card:"#ffffff",card2:"#eef0f4",line:"
 /* ---- Rangs ---- */
 const CLASSIC = [
   {n:"Fer",c:"#9aa0a8",c2:"#3a3d44"},{n:"Bronze",c:"#e8a06a",c2:"#7a3f17"},{n:"Argent",c:"#e6ebf2",c2:"#7d8794"},
-  {n:"Or",c:"#ffd75e",c2:"#a8740c"},{n:"Platine",c:"#6ff2df",c2:"#147a6e"},{n:"Diamant",c:"#9cc2ff",c2:"#3346c9"},{n:"Légende",c:"#ff4a5c",c2:"#6e0012"}
+  {n:"Or",c:"#ffd75e",c2:"#a8740c"},{n:"Platine",c:"#6ff2df",c2:"#147a6e"},{n:"Diamant",c:"#9cc2ff",c2:"#3346c9"},{n:"Légende",c:"#ff4a5c",c2:"#6e0012"},{n:"Ultime",c:"#ff7ae0",c2:"#3a0a7a",ultime:true}
 ];
 let TIERS = CLASSIC;
 // src : [exercice, type, multiplicateur]  type: e1 = 1RM estimé, reps = reps max sur une série, val = valeur brute (sec / min)
 const CATS = [
-  {id:"bras",name:"Bras",ic:"💪",unit:"pts",desc:"Moyenne de tes 3 sous-rangs : Biceps, Triceps et Avant-bras",composite:["biceps","triceps","avantbras"],_st:Array.from({length:21},(_,i)=>i+1),th:[1,4,7,10,13,16,19]},
+  {id:"bras",name:"Bras",ic:"💪",unit:"pts",desc:"Moyenne de tes 3 sous-rangs : Biceps, Triceps et Avant-bras",composite:["biceps","triceps","avantbras"],_st:Array.from({length:24},(_,i)=>i+1),th:[1,4,7,10,13,16,19,22]},
   {id:"biceps",parent:"bras",name:"Biceps",ic:"💪",unit:"kg / bras",desc:"1RM estimé au curl, ramené par bras",src:[["Curl barre","e1",.5],["Curl haltère","e1",1],["Curl marteau","e1",.9]],th:[6,9,12,15,19,24,30]},
   {id:"avantbras",parent:"bras",name:"Avant-bras",ic:"✊",unit:"pts",desc:"Force de grip : curl marteau / inversé / poignets (1RM estimé) ou suspension à la barre (secondes ÷ 4)",src:[["Curl marteau","e1",1],["Curl inversé","e1",1.3],["Curl poignets","e1",.8],["Suspension à la barre (sec)","val",.25]],th:[5,8,11,14,18,23,29]},
   {id:"triceps",parent:"bras",name:"Triceps",ic:"🔱",unit:"kg",desc:"1RM estimé à l'extension barre",src:[["Extension triceps barre (skull crusher)","e1",1],["Extension nuque (barre)","e1",1],["JM press","e1",.8],["Développé serré","e1",.55],["Extension couchée haltères","e1",1.6],["Extension nuque (haltère)","e1",1.1],["Pushdown barre (poulie)","e1",.75],["Extension triceps poulie (corde)","e1",.7]],th:[10,15,22,30,40,50,62]},
@@ -611,6 +614,8 @@ function gaugeInfo(){
     <button class="btn sec" style="margin-top:14px" onclick="closeModal()">Fermer</button>`);
 }
 
+// Ultime : environ 25 % au-dessus du seuil Légende (dur, mais atteignable)
+CATS.forEach(c=>{ if(c.th.length===7){ const x=c.th[6]*1.25; c.th.push(c.special==="steps"?Math.round(x/500)*500:x>=50?Math.round(x/5)*5:Math.round(x)); } });
 /* ================= État ================= */
 let S = { sessions:[], weights:[], current:null, custom:[], profile:{sexe:"H",age:"",taille:"",act:1.55,goal:"recompo",rest:90}, days:{}, foods:[], templates:[], seen:{}, settings:{accent:"#e5202e",bg:"noir",name:"",bgType:"solid",bgGrad:"flamme",bgAnim:"aurora",bgBlur:8,bgDim:45,cardStyle:"solid",radius:"normal",font:"inter",hfont:"inter",density:"normal",anim:"on",navLabels:true,gaugeSize:"big",greet:"",home:null} };
 let animateNext=true, progFilter="Tous";
@@ -789,7 +794,8 @@ const DIVS=["I","II","III"];
 function stepThs(c){
   if(c._st) return c._st;
   const isKg=c.unit.includes("kg"), out=[];
-  for(let i=0;i<7;i++){ const lo=c.th[i], hi=i<6?c.th[i+1]:c.th[6]*1.3;
+  const NT=c.th.length;
+  for(let i=0;i<NT;i++){ const lo=c.th[i], hi=i<NT-1?c.th[i+1]:c.th[NT-1]*1.2;
     for(let d=0;d<3;d++){ let v=lo+(hi-lo)*d/3; v=isKg?Math.round(v*2)/2:Math.round(v); if(d===0) v=lo; const prev=out[out.length-1]; if(prev!==undefined&&v<=prev) v=prev+(isKg?.5:1); out.push(v); } }
   return c._st=out;
 }
@@ -847,7 +853,7 @@ function classicEmblem(t,size,mys,div,styleKey){
   const spark=(x,y,sc,delay)=>`<g transform="translate(${x} ${y}) scale(${sc})"><path d="M0,-6 L1.4,-1.4 L6,0 L1.4,1.4 L0,6 L-1.4,1.4 L-6,0 L-1.4,-1.4Z" fill="#fff" opacity="0">
       <animate attributeName="opacity" values="0;1;0" dur="2.2s" begin="${delay}s" repeatCount="indefinite"/>
       <animateTransform attributeName="transform" type="scale" values=".2;1.2;.2" dur="2.2s" begin="${delay}s" repeatCount="indefinite"/></path></g>`;
-  const aura=`<circle cx="50" cy="50" r="${t===6?66:58}" fill="url(#${id}a)"><animate attributeName="opacity" values=".45;1;.45" dur="${t===6?1.6:2.6}s" repeatCount="indefinite"/></circle>`;
+  const aura=`<circle cx="50" cy="50" r="${t>=6?66:58}" fill="url(#${id}a)"><animate attributeName="opacity" values=".45;1;.45" dur="${t>=6?1.6:2.6}s" repeatCount="indefinite"/></circle>`;
   const ring1=`<circle cx="50" cy="50" r="57" fill="none" stroke="${T.c}" stroke-width="1.6" stroke-dasharray="1.5 7" stroke-linecap="round" opacity=".9">${spin(14)}</circle>`;
   const ring2=t>=5?`<circle cx="50" cy="50" r="51" fill="none" stroke="${T.c}" stroke-width="1" stroke-dasharray="14 6" opacity=".5">${spin(9,1)}</circle>`:"";
   const wings=`<g stroke="${T.c}" stroke-width="1.3" stroke-linejoin="round">
@@ -856,48 +862,57 @@ function classicEmblem(t,size,mys,div,styleKey){
       ${t>=5&&!ST.ribbon?`<g fill="${T.c2}"><polygon points="30,92 22,104 40,98 50,108 60,98 78,104 70,92"/></g>`:""}</g>`;
   const gem=t===5?`<g><polygon points="50,-10 41,0 50,10 59,0" fill="${T.c}" stroke="#fff" stroke-width="1.5"/><polygon points="50,-10 45,0 50,10" fill="#fff" opacity=".35"/>
       <animateTransform attributeName="transform" type="translate" values="0 0;0 -2.5;0 0" dur="2s" repeatCount="indefinite"/></g>`:"";
-  const crown=t===6?`<g><path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10 Z" fill="${T.c}" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+  const crown=t>=6?`<g><path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10 Z" fill="${T.c}" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
       <circle cx="50" cy="-14" r="3" fill="#fff"/><circle cx="33" cy="-8" r="2.2" fill="#fff"/><circle cx="67" cy="-8" r="2.2" fill="#fff"/>
       <path d="M30,10 L33,-8 L42,3 L50,-14 L58,3 L67,-8 L70,10 Z" fill="${T.c}" filter="url(#${id}f)" opacity=".8"><animate attributeName="opacity" values=".2;.9;.2" dur="1.4s" repeatCount="indefinite"/></path>
       <animateTransform attributeName="transform" type="translate" values="0 0;0 -2;0 0" dur="1.8s" repeatCount="indefinite"/></g>`:"";
-  const flames=t===6?[[-14,0],[0,.35],[14,.7]].map(([dx,d])=>`<ellipse cx="${50+dx}" cy="30" rx="16" ry="34" fill="${T.c}" filter="url(#${id}f)" opacity=".5">
+  const flames=t>=6?[[-14,0],[0,.35],[14,.7]].map(([dx,d])=>`<ellipse cx="${50+dx}" cy="30" rx="16" ry="34" fill="${T.c}" filter="url(#${id}f)" opacity=".5">
       <animate attributeName="ry" values="30;40;30" dur="${.9+d}s" repeatCount="indefinite"/><animate attributeName="cy" values="34;24;34" dur="${.9+d}s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values=".35;.7;.35" dur="${.9+d}s" repeatCount="indefinite"/></ellipse>`).join(""):"";
-  const embers=t===6?[0,1.2,2.4,3.6].map((b,i)=>`<circle r="${i%2?1.8:2.6}" fill="${i%2?"#fff":T.c}"><animateMotion dur="4.8s" begin="-${b}s" repeatCount="indefinite" path="M50,-6 A56,56 0 1,1 49.9,-6"/></circle>`).join(""):"";
+  const embers=t>=6?[0,1.2,2.4,3.6].map((b,i)=>`<circle r="${i%2?1.8:2.6}" fill="${i%2?"#fff":T.c}"><animateMotion dur="4.8s" begin="-${b}s" repeatCount="indefinite" path="M50,-6 A56,56 0 1,1 49.9,-6"/></circle>`).join(""):"";
   const shine=`<g clip-path="url(#${id}c)"><rect x="-40" y="-10" width="22" height="130" fill="url(#${id}w)" transform="skewX(-18)" opacity=".7">
-      <animate attributeName="x" values="-60;-60;150" keyTimes="0;.55;1" dur="${t===6?2.4:3.2}s" repeatCount="indefinite"/></rect></g>`;
-  const core=t===6?`<g transform="translate(50 52)"><polygon points="0,-16 4.7,-5.6 16,-4.7 7.5,2.8 10.3,14 0,8.4 -10.3,14 -7.5,2.8 -16,-4.7 -4.7,-5.6" fill="#fff">
+      <animate attributeName="x" values="-60;-60;150" keyTimes="0;.55;1" dur="${t>=6?2.4:3.2}s" repeatCount="indefinite"/></rect></g>`;
+  const core=t>=6?`<g transform="translate(50 52)"><polygon points="0,-16 4.7,-5.6 16,-4.7 7.5,2.8 10.3,14 0,8.4 -10.3,14 -7.5,2.8 -16,-4.7 -4.7,-5.6" fill="#fff">
       <animateTransform attributeName="transform" type="scale" values="1;1.15;1" dur="1.2s" repeatCount="indefinite"/></polygon></g>`
     :`<g>${chev}<animate attributeName="opacity" values="1;.75;1" dur="2s" repeatCount="indefinite"/></g>`;
-  const innerGlow=`<path d="${ST.i}" fill="none" stroke="#fff" stroke-width="1.5" opacity=".2"><animate attributeName="opacity" values=".1;.6;.1" dur="${t===6?1.2:2.2}s" repeatCount="indefinite"/></path>`;
-  const sparks=[[-2,8,.9,0],[104,4,.8,.8],[100,92,.7,1.5],[0,96,.75,.4],...(t>=5?[[50,-18,.7,1.1],[112,52,.6,1.8]]:[]),...(t===6?[[-14,52,.8,.6],[86,-14,.7,1.3]]:[])].map(a=>spark(...a)).join("");
-  const sz=Math.round(size*1.2);
-  return `<svg viewBox="-20 -26 140 140" width="${sz}" height="${sz}" style="overflow:visible;margin:${-(sz-size)/2}px">${base}
-    ${aura}${flames}${ring1}${ring2}${wings}${body}${innerGlow}${shine}${core}${pips}${gem}${crown}${embers}${sparks}</svg>`;
+  const innerGlow=`<path d="${ST.i}" fill="none" stroke="#fff" stroke-width="1.5" opacity=".2"><animate attributeName="opacity" values=".1;.6;.1" dur="${t>=6?1.2:2.2}s" repeatCount="indefinite"/></path>`;
+  const sparks=[[-2,8,.9,0],[104,4,.8,.8],[100,92,.7,1.5],[0,96,.75,.4],...(t>=5?[[50,-18,.7,1.1],[112,52,.6,1.8]]:[]),...(t>=6?[[-14,52,.8,.6],[86,-14,.7,1.3]]:[])].map(a=>spark(...a)).join("");
+  const ult=T.ultime?ultimeFX(id,T):{back:"",front:""};
+  const sz=Math.round(size*(T.ultime?1.3:1.2));
+  return `<svg viewBox="-20 -26 140 140" width="${sz}" height="${sz}" class="${T.ultime?"ultime":""}" style="overflow:visible;margin:${-(sz-size)/2}px">${base}
+    ${ult.back}${aura}${flames}${ring1}${ring2}${wings}${body}${innerGlow}${shine}${core}${pips}${gem}${crown}${embers}${sparks}${ult.front}</svg>`;
 }
 
 /* ---------- Thèmes de rangs complets ---------- */
 const RANK_THEMES={
-  classic:{l:"Classique",d:"Fer › Bronze › … › Légende",tiers:CLASSIC},
+  classic:{l:"Classique",d:"Fer › Bronze › … › Légende › Ultime",tiers:CLASSIC},
   belts:{l:"Ceintures",d:"Arts martiaux, de la blanche à la noire",tiers:[
     {n:"Blanche",c:"#f2f2f2",c2:"#8a8a8a",belt:"#f4f4f4",edge:"#b5b5b5",stripe:"#111"},{n:"Jaune",c:"#ffd43b",c2:"#8a6d00",belt:"#ffd43b",edge:"#c9a400",stripe:"#111"},
     {n:"Orange",c:"#ff8c2a",c2:"#8a3d00",belt:"#ff8c2a",edge:"#c86410",stripe:"#111"},{n:"Verte",c:"#35d06a",c2:"#145c2a",belt:"#2fbf5b",edge:"#1d8a3e",stripe:"#111"},
     {n:"Bleue",c:"#4f8dff",c2:"#1a3a8a",belt:"#2f6bff",edge:"#1d47b0",stripe:"#111"},{n:"Marron",c:"#c9905e",c2:"#4a2a12",belt:"#7a4a22",edge:"#4f2d12",stripe:"#ffd75e"},
-    {n:"Noire",c:"#ffd75e",c2:"#3a2d00",belt:"#161616",edge:"#ffd75e",stripe:"#ff3b4e"}]},
+    {n:"Noire",c:"#ffd75e",c2:"#3a2d00",belt:"#161616",edge:"#ffd75e",stripe:"#ff3b4e"},{n:"Rouge et blanche",c:"#ff7ae0",c2:"#5a0016",belt:"#e5202e",edge:"#ffffff",stripe:"#ffd75e",redwhite:true,ultime:true}]},
   army:{l:"Militaire",d:"De recrue à général",tiers:[
     {n:"Recrue",c:"#b4bba8",c2:"#3a3f30"},{n:"Soldat",c:"#d6b07a",c2:"#5a3f17"},{n:"Caporal",c:"#e6ebf2",c2:"#5d6774"},{n:"Sergent",c:"#ffd75e",c2:"#8a5f00"},
-    {n:"Lieutenant",c:"#6ff2df",c2:"#147a6e"},{n:"Capitaine",c:"#9cc2ff",c2:"#3346c9"},{n:"Général",c:"#ff4a5c",c2:"#6e0012"}]},
+    {n:"Lieutenant",c:"#6ff2df",c2:"#147a6e"},{n:"Capitaine",c:"#9cc2ff",c2:"#3346c9"},{n:"Général",c:"#ff4a5c",c2:"#6e0012"},{n:"Maréchal",c:"#ff7ae0",c2:"#3a0a7a",ultime:true}]},
   cosmos:{l:"Cosmique",d:"De l'astéroïde au trou noir",tiers:[
     {n:"Astéroïde",c:"#b0b6c3",c2:"#3a3d44"},{n:"Lune",c:"#f4f1c9",c2:"#8a855a"},{n:"Planète",c:"#4fd1c5",c2:"#145c57"},{n:"Étoile",c:"#ffd75e",c2:"#a8740c"},
-    {n:"Nébuleuse",c:"#ff7ad9",c2:"#6a1a5a"},{n:"Galaxie",c:"#a58bff",c2:"#33207a"},{n:"Trou noir",c:"#ff8a3d",c2:"#5a1d00"}]},
+    {n:"Nébuleuse",c:"#ff7ad9",c2:"#6a1a5a"},{n:"Galaxie",c:"#a58bff",c2:"#33207a"},{n:"Trou noir",c:"#ff8a3d",c2:"#5a1d00"},{n:"Big Bang",c:"#ff7ae0",c2:"#3a0a7a",ultime:true}]},
   animals:{l:"Animaux",d:"Du poussin au dragon",tiers:[
     {n:"Poussin",c:"#f5d76e",c2:"#7a6216",e:"🐣"},{n:"Chat",c:"#e8a06a",c2:"#7a3f17",e:"🐱"},{n:"Loup",c:"#b8c4d6",c2:"#3d4a5c",e:"🐺"},{n:"Ours",c:"#c9905e",c2:"#4a2a12",e:"🐻"},
-    {n:"Lion",c:"#ffd75e",c2:"#a8740c",e:"🦁"},{n:"T-Rex",c:"#6ff2a0",c2:"#14703a",e:"🦖"},{n:"Dragon",c:"#ff4a5c",c2:"#6e0012",e:"🐉"}]},
+    {n:"Lion",c:"#ffd75e",c2:"#a8740c",e:"🦁"},{n:"T-Rex",c:"#6ff2a0",c2:"#14703a",e:"🦖"},{n:"Dragon",c:"#ff4a5c",c2:"#6e0012",e:"🐉"},{n:"Kraken",c:"#ff7ae0",c2:"#3a0a7a",e:"🐙",ultime:true}]},
   gym:{l:"Délire salle",d:"De crevette à Mr. Olympia",tiers:[
     {n:"Crevette",c:"#ff9e8a",c2:"#7a2f20",e:"🦐"},{n:"Brindille",c:"#8fd16a",c2:"#2f5a14",e:"🌱"},{n:"Costaud",c:"#ffd166",c2:"#8a6000",e:"💪"},{n:"Armoire à glace",c:"#9cc2ff",c2:"#2a3f7a",e:"🚪"},
-    {n:"Bulldozer",c:"#ffb000",c2:"#7a4a00",e:"🚜"},{n:"Titan",c:"#c3c9d6",c2:"#3a3f4c",e:"🗿"},{n:"Mr. Olympia",c:"#ff4a5c",c2:"#6e0012",e:"🏆"}]}
+    {n:"Bulldozer",c:"#ffb000",c2:"#7a4a00",e:"🚜"},{n:"Titan",c:"#c3c9d6",c2:"#3a3f4c",e:"🗿"},{n:"Mr. Olympia",c:"#ff4a5c",c2:"#6e0012",e:"🏆"},{n:"Ronnie Coleman",c:"#ff7ae0",c2:"#3a0a7a",e:"👑",ultime:true}]}
 };
 function curTheme(k){ return RANK_THEMES[k||S.settings.rankTheme]||RANK_THEMES.classic; }
+// Effets supplémentaires du rang Ultime (tous thèmes)
+function ultimeFX(id,T){
+  const rays=Array.from({length:12},(_,i)=>`<path d="M50,50 L${(50+70*Math.cos(i*Math.PI/6-.06)).toFixed(1)},${(50+70*Math.sin(i*Math.PI/6-.06)).toFixed(1)} L${(50+70*Math.cos(i*Math.PI/6+.06)).toFixed(1)},${(50+70*Math.sin(i*Math.PI/6+.06)).toFixed(1)}Z" fill="${i%2?T.c:"#fff"}" opacity=".18"/>`).join("");
+  const back=`<g>${rays}<animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="16s" repeatCount="indefinite"/></g>
+    <circle cx="50" cy="50" r="62" fill="none" stroke="${T.c}" stroke-width="2.5" stroke-dasharray="2 5" opacity=".9"><animateTransform attributeName="transform" type="rotate" from="360 50 50" to="0 50 50" dur="7s" repeatCount="indefinite"/></circle>`;
+  const orbit=[0,1.5,3,4.5].map((b,i)=>`<g><path d="M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1Z" fill="#fff"/><animateMotion dur="6s" begin="-${b}s" repeatCount="indefinite" path="M50,-14 A64,64 0 1,1 49.9,-14"/></g>`).join("");
+  return {back,front:orbit};
+}
 function emblem(t,size,mys,div,shapeKey,themeKey){
   const key=themeKey||S.settings.rankTheme||"classic";
   if(key==="classic"||t<0||mys) return classicEmblem(t,size,mys,div,key==="classic"?shapeKey:"medal");
@@ -916,15 +931,16 @@ function fxWrap(t,size,div,T,id,art,clip,pipY){
   if(t<4) return `<svg viewBox="-4 -4 108 108" width="${size}" height="${size}">${defs}${art}${pips}</svg>`;
   const spin=(dur,rev)=>`<animateTransform attributeName="transform" type="rotate" from="${rev?360:0} 50 50" to="${rev?0:360} 50 50" dur="${dur}s" repeatCount="indefinite"/>`;
   const spark=(x,y,sc,dl)=>`<g transform="translate(${x} ${y}) scale(${sc})"><path d="M0,-6 L1.4,-1.4 L6,0 L1.4,1.4 L0,6 L-1.4,1.4 L-6,0 L-1.4,-1.4Z" fill="#fff" opacity="0"><animate attributeName="opacity" values="0;1;0" dur="2.2s" begin="${dl}s" repeatCount="indefinite"/></path></g>`;
-  const aura=`<circle cx="50" cy="50" r="${t===6?64:58}" fill="url(#${id}a)"><animate attributeName="opacity" values=".45;1;.45" dur="${t===6?1.6:2.6}s" repeatCount="indefinite"/></circle>`;
+  const aura=`<circle cx="50" cy="50" r="${t>=6?64:58}" fill="url(#${id}a)"><animate attributeName="opacity" values=".45;1;.45" dur="${t>=6?1.6:2.6}s" repeatCount="indefinite"/></circle>`;
   const r1=`<circle cx="50" cy="50" r="56" fill="none" stroke="${T.c}" stroke-width="1.6" stroke-dasharray="1.5 7" stroke-linecap="round">${spin(14)}</circle>`;
   const r2=t>=5?`<circle cx="50" cy="50" r="51" fill="none" stroke="${T.c}" stroke-width="1" stroke-dasharray="14 6" opacity=".5">${spin(9,1)}</circle>`:"";
-  const flames=t===6?[[-14,0],[0,.35],[14,.7]].map(([dx,d])=>`<ellipse cx="${50+dx}" cy="30" rx="16" ry="34" fill="${T.c}" filter="url(#${id}f)" opacity=".45"><animate attributeName="ry" values="30;40;30" dur="${.9+d}s" repeatCount="indefinite"/><animate attributeName="cy" values="34;22;34" dur="${.9+d}s" repeatCount="indefinite"/></ellipse>`).join(""):"";
-  const embers=t===6?[0,1.2,2.4,3.6].map((b,i)=>`<circle r="${i%2?1.8:2.6}" fill="${i%2?"#fff":T.c}"><animateMotion dur="4.8s" begin="-${b}s" repeatCount="indefinite" path="M50,-6 A56,56 0 1,1 49.9,-6"/></circle>`).join(""):"";
-  const shine=`<g clip-path="url(#${id}c)"><rect x="-40" y="-10" width="20" height="130" fill="url(#${id}w)" transform="skewX(-18)" opacity=".6"><animate attributeName="x" values="-60;-60;150" keyTimes="0;.55;1" dur="${t===6?2.4:3.2}s" repeatCount="indefinite"/></rect></g>`;
-  const sparks=[[-2,8,.9,0],[104,4,.8,.8],[100,92,.7,1.5],[0,96,.75,.4],...(t>=5?[[50,-14,.7,1.1],[110,52,.6,1.8]]:[]),...(t===6?[[-12,52,.8,.6],[86,-12,.7,1.3]]:[])].map(a=>spark(...a)).join("");
-  const sz=Math.round(size*1.2);
-  return `<svg viewBox="-20 -20 140 140" width="${sz}" height="${sz}" style="overflow:visible;margin:${-(sz-size)/2}px">${defs}${aura}${flames}${r1}${r2}${art}${shine}${pips}${embers}${sparks}</svg>`;
+  const flames=t>=6?[[-14,0],[0,.35],[14,.7]].map(([dx,d])=>`<ellipse cx="${50+dx}" cy="30" rx="16" ry="34" fill="${T.c}" filter="url(#${id}f)" opacity=".45"><animate attributeName="ry" values="30;40;30" dur="${.9+d}s" repeatCount="indefinite"/><animate attributeName="cy" values="34;22;34" dur="${.9+d}s" repeatCount="indefinite"/></ellipse>`).join(""):"";
+  const embers=t>=6?[0,1.2,2.4,3.6].map((b,i)=>`<circle r="${i%2?1.8:2.6}" fill="${i%2?"#fff":T.c}"><animateMotion dur="4.8s" begin="-${b}s" repeatCount="indefinite" path="M50,-6 A56,56 0 1,1 49.9,-6"/></circle>`).join(""):"";
+  const shine=`<g clip-path="url(#${id}c)"><rect x="-40" y="-10" width="20" height="130" fill="url(#${id}w)" transform="skewX(-18)" opacity=".6"><animate attributeName="x" values="-60;-60;150" keyTimes="0;.55;1" dur="${t>=6?2.4:3.2}s" repeatCount="indefinite"/></rect></g>`;
+  const sparks=[[-2,8,.9,0],[104,4,.8,.8],[100,92,.7,1.5],[0,96,.75,.4],...(t>=5?[[50,-14,.7,1.1],[110,52,.6,1.8]]:[]),...(t>=6?[[-12,52,.8,.6],[86,-12,.7,1.3]]:[])].map(a=>spark(...a)).join("");
+  const ult=T.ultime?ultimeFX(id,T):{back:"",front:""};
+  const sz=Math.round(size*(T.ultime?1.3:1.2));
+  return `<svg viewBox="-20 -20 140 140" width="${sz}" height="${sz}" class="${T.ultime?"ultime":""}" style="overflow:visible;margin:${-(sz-size)/2}px">${defs}${ult.back}${aura}${flames}${r1}${r2}${art}${shine}${pips}${embers}${sparks}${ult.front}</svg>`;
 }
 const CIRC="M50,4 A46,46 0 1,1 49.9,4Z";
 function badgeBg(T,id,inner){ return `<defs><radialGradient id="${id}bg" cx=".5" cy=".35" r=".75"><stop offset="0" stop-color="${inner||"#2a2a33"}"/><stop offset="1" stop-color="#0b0b0f"/></radialGradient></defs>
@@ -935,6 +951,7 @@ function drawBelt(t,T,id,div){
   const stripes=[0,1,2].slice(0,div==null?0:div+1).map((_,i)=>{ const f=.55+i*.13, x=55+(62-55)*f, y=55+(81-55)*f; return `<line x1="${x-4.6}" y1="${y+1.5}" x2="${x+4.6}" y2="${y-1.5}" stroke="${T.stripe}" stroke-width="2.6" stroke-linecap="round"/>`; }).join("");
   const art=`${badgeBg(T,id)}<g transform="rotate(-8 50 50)">
     <rect x="8" y="40" width="84" height="13" rx="3" fill="${B}" stroke="${E}" stroke-width="1.6"/>
+    ${T.redwhite?[0,1,2,3,4,5].map(i=>`<rect x="${12+i*13.5}" y="40.8" width="6.7" height="11.4" fill="#fff"/>`).join(""):""}
     <line x1="11" y1="43.6" x2="89" y2="43.6" stroke="rgba(0,0,0,.25)" stroke-width="1" stroke-dasharray="2 2"/><line x1="11" y1="49.4" x2="89" y2="49.4" stroke="rgba(0,0,0,.25)" stroke-width="1" stroke-dasharray="2 2"/>
     <path d="M45,52 L34,82 L42,85 L50,57Z" fill="${B}" stroke="${E}" stroke-width="1.6" stroke-linejoin="round"/>
     <path d="M55,52 L66,82 L58,85 L50,57Z" fill="${B}" stroke="${E}" stroke-width="1.6" stroke-linejoin="round"/>
@@ -953,7 +970,8 @@ function drawArmy(t,T,id){
   const ins=[chev(1),chev(2),chev(3),chev(3)+`<path d="M28,64 Q50,80 72,64" ${st}/>`,
     `<rect x="44.5" y="26" width="11" height="44" rx="2" fill="${c}" stroke="#fff" stroke-width=".8"/>`,
     `<rect x="35" y="26" width="11" height="44" rx="2" fill="${c}" stroke="#fff" stroke-width=".8"/><rect x="54" y="26" width="11" height="44" rx="2" fill="${c}" stroke="#fff" stroke-width=".8"/>`,
-    star(28,50,11)+star(50,38,13)+star(72,50,11)][t];
+    star(28,50,11)+star(50,38,13)+star(72,50,11),
+    star(22,52,8)+star(36,40,9)+star(50,34,11)+star(64,40,9)+star(78,52,8)+`<rect x="30" y="58" width="40" height="8" rx="4" fill="${c}" stroke="#fff" stroke-width=".8"/>`][t];
   const art=`<defs><linearGradient id="${id}o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b6b33"/><stop offset="1" stop-color="#1e2410"/></linearGradient></defs>
     <path d="${SH}" fill="url(#${id}o)" stroke="${c}" stroke-width="3.5"/>
     <path d="M50,11 L81,19 L81,48 C81,68 68,80 50,88 C32,80 19,68 19,48 L19,19Z" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.2" stroke-dasharray="3 2.5"/>
@@ -973,7 +991,9 @@ function drawCosmos(t,T,id){
     `<g>${[0,180].map(r=>`<path d="M50,50 C50,38 62,32 70,40 C78,48 72,64 58,68 C44,72 30,62 30,48" fill="none" stroke="#c9b8ff" stroke-width="4" stroke-linecap="round" opacity=".85" transform="rotate(${r} 50 50)" style="filter:blur(.6px)"/>`).join("")}<circle cx="50" cy="50" r="7" fill="#fff" style="filter:drop-shadow(0 0 6px ${T.c})"/>${spin(16)}</g>`,
     `<g transform="rotate(-15 50 50)"><ellipse cx="50" cy="50" rx="36" ry="11" fill="none" stroke="${T.c}" stroke-width="7" opacity=".55" style="filter:blur(2px)"/><ellipse cx="50" cy="50" rx="34" ry="10" fill="none" stroke="#ffd29a" stroke-width="2.5" stroke-dasharray="8 5"><animate attributeName="stroke-dashoffset" values="0;-26" dur="1.4s" repeatCount="indefinite"/></ellipse></g>
      <path d="M34,44 A17,17 0 0,1 66,44" fill="none" stroke="#ffb27a" stroke-width="2.5" opacity=".8"/><circle cx="50" cy="50" r="15" fill="#000" stroke="#ffe2bf" stroke-width="1.6"/>
-     <g transform="rotate(-15 50 50)"><path d="M16,50 A34,10 0 0,0 84,50" fill="none" stroke="${T.c}" stroke-width="5"/></g>`
+     <g transform="rotate(-15 50 50)"><path d="M16,50 A34,10 0 0,0 84,50" fill="none" stroke="${T.c}" stroke-width="5"/></g>`,
+    `<g>${Array.from({length:16},(_,i)=>`<line x1="50" y1="50" x2="${(50+36*Math.cos(i*Math.PI/8)).toFixed(1)}" y2="${(50+36*Math.sin(i*Math.PI/8)).toFixed(1)}" stroke="${["#fff","#ffd75e","#ff7ae0","#7ad8ff"][i%4]}" stroke-width="2.4" stroke-linecap="round"><animate attributeName="opacity" values=".3;1;.3" dur="${1+i%3*.4}s" repeatCount="indefinite"/></line>`).join("")}
+      <circle cx="50" cy="50" r="12" fill="#fff" style="filter:drop-shadow(0 0 10px #fff)"><animate attributeName="r" values="10;14;10" dur="1.4s" repeatCount="indefinite"/></circle></g>`
   ][t];
   const art=`<defs><radialGradient id="${id}bg" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#1b2150"/><stop offset="1" stop-color="#04050d"/></radialGradient>
     <linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${T.c}"/><stop offset="1" stop-color="${T.c2}"/></linearGradient></defs>
@@ -1392,7 +1412,7 @@ function viewRangs(){
     ${emblem(g.tier,96,false,g.div)}<div class="grow" style="position:relative"><div class="small mut" style="font-weight:800;letter-spacing:.6px">RANG GLOBAL</div>
     <div style="font-size:28px;font-weight:900;color:${TIERS[g.tier].c};letter-spacing:.5px">${rankName(g.step).toUpperCase()}</div>
     <div class="small mut">${g.n}/${CATS.length} catégories · <b style="color:var(--txt)">${fr(g.power)}</b> pts</div>
-    ${g.step<20?`<div class="bar"><i style="width:${(g.avg-g.step)*100}%;background:${TIERS[g.tier].c}"></i></div>`:""}</div></div>`
+    ${g.step<(TIERS.length*3-1)?`<div class="bar"><i style="width:${(g.avg-g.step)*100}%;background:${TIERS[g.tier].c}"></i></div>`:""}</div></div>`
     :`<div class="card" style="text-align:center">${emblem(-1,80)}<div style="font-weight:800;margin-top:6px">Non classé</div><div class="small mut">Termine une séance avec des exos classés pour obtenir tes premiers rangs.</div></div>`;
   const seg=`<div class="seg" style="margin-bottom:14px"><button class="${rangsSeg==="moi"?"on":""}" onclick="rangsSeg='moi';animateNext=true;render()">🛡️ Mes rangs</button><button class="${rangsSeg==="potes"?"on":""}" onclick="rangsSeg='potes';animateNext=true;render();loadPotes(true)">🏆 Potes</button></div>`;
   if(rangsSeg==="potes") return header("Rangs")+seg+viewPotes();
@@ -1404,7 +1424,7 @@ function viewRangs(){
 function rankCard(c,x,r){
   const mys=x.step>=0&&S.seen[c.id]===undefined;
   if(mys) return `<button class="rk-card mystery" onclick="revealOne('${c.id}')">${emblem(-1,64,true)}<div class="cat">${c.ic} ${c.name}</div><div class="tier" style="color:var(--acc)">???</div><div class="val">Touche pour révéler</div></button>`;
-  const st=stepThs(c), T=x.step>=0?TIERS[x.tier]:null, nx=x.step<20?x.step+1:null;
+  const st=stepThs(c), T=x.step>=0?TIERS[x.tier]:null, nx=x.step<(TIERS.length*3-1)?x.step+1:null;
   const lo=x.step>=0?st[x.step]:0, hi=nx!=null?st[nx]:null;
   const pct=hi!=null?Math.max(0,Math.min(100,(x.score-lo)/(hi-lo)*100)):100;
   return `<button class="rk-card ${x.tier>=4?"hi":""}" style="${x.tier>=4?`--tc:${TIERS[x.tier].c}`:""}" onclick="rankDetail('${c.id}')">${T?`<div class="glow" style="background:radial-gradient(circle,${T.c},transparent 60%)"></div>`:""}
@@ -1430,9 +1450,9 @@ function rankDetail(id){
 function compositeDetail(c,R){
   const x=R[c.id];
   modal(`<div class="row" style="margin-bottom:12px">${emblem(x.tier,72,false,x.step>=0?x.div:null)}<div class="grow"><div class="small mut" style="font-weight:800">${c.ic} ${c.name.toUpperCase()}</div><div style="font-size:24px;font-weight:900;color:${x.tier>=0?TIERS[x.tier].c:"var(--mut)"}">${rankName(x.step)}</div><div class="small mut">${c.desc}.</div></div></div>
-    ${c.composite.map(id=>{ const sc=CATS.find(k=>k.id===id), sx=R[id]; return `<button class="card row" style="width:100%;text-align:left;margin-bottom:8px" onclick="rankDetail('${id}')">${emblem(sx.tier,44,false,sx.step>=0?sx.div:null)}<div class="grow"><b>${sc.ic} ${sc.name}</b><div class="small" style="color:${sx.tier>=0?TIERS[sx.tier].c:"var(--mut)"};font-weight:800">${rankName(sx.step)}</div><div class="small mut">${sx.has?`${fr1(sx.score)} ${sc.unit}`:"Pas encore de données"}</div></div><b class="mut">${sx.step+1}/21</b></button>`; }).join("")}
+    ${c.composite.map(id=>{ const sc=CATS.find(k=>k.id===id), sx=R[id]; return `<button class="card row" style="width:100%;text-align:left;margin-bottom:8px" onclick="rankDetail('${id}')">${emblem(sx.tier,44,false,sx.step>=0?sx.div:null)}<div class="grow"><b>${sc.ic} ${sc.name}</b><div class="small" style="color:${sx.tier>=0?TIERS[sx.tier].c:"var(--mut)"};font-weight:800">${rankName(sx.step)}</div><div class="small mut">${sx.has?`${fr1(sx.score)} ${sc.unit}`:"Pas encore de données"}</div></div><b class="mut">${sx.step+1}/24</b></button>`; }).join("")}
     <div class="macro" style="text-align:center;margin-top:4px"><b>${c.composite.map(id=>R[id].step+1).join(" + ")} = ${c.composite.reduce((a,id)=>a+R[id].step+1,0)} pts</b><span>÷ 3 = ${fr1(x.score)} → ${rankName(x.step)}</span></div>
-    <div class="note">Chaque sous-rang vaut de 0 (non classé) à 21 points (Légende III). Leur moyenne donne ton rang Bras : travaille les trois pour monter !</div>
+    <div class="note">Chaque sous-rang vaut de 0 (non classé) à 24 points (${TIERS[7].n} III). Leur moyenne donne ton rang Bras : travaille les trois pour monter !</div>
     <button class="btn sec" style="margin-top:12px" onclick="closeModal()">Fermer</button>`);
 }
 function revealOne(id){ const x=allRanks()[id]; playRanks([{id,from:null,to:x.step,score:x.score}]); }
@@ -1458,7 +1478,7 @@ function nextRank(){
   S.seen[it.id]=it.to;
   const pop=up?1.25:1.0;
   let parts=""; for(let i=0;i<22;i++) parts+=`<i class="rk-p" style="--a:${Math.round(i*360/22+Math.random()*10)}deg;--d:${110+Math.random()*90}px;${i%3===0?"background:#fff;":""}${i%2?"border-radius:50%;":""}"></i>`;
-  const next=it.to<20?`Prochain : <b style="color:${TIERS[Math.floor((it.to+1)/3)].c}">${rankName(it.to+1)}</b> à ${fr1(stepThs(c)[it.to+1])} ${c.unit}`:"Rang maximum atteint 👑";
+  const next=it.to<(TIERS.length*3-1)?`Prochain : <b style="color:${TIERS[Math.floor((it.to+1)/3)].c}">${rankName(it.to+1)}</b> à ${fr1(stepThs(c)[it.to+1])} ${c.unit}`:"Rang maximum atteint 👑";
   L.innerHTML=`<div class="rk-ov" style="--c:${T.c};--pop:${pop}s" onclick="if(this.dataset.ready)nextRank()">
     <div class="rk-rays"></div><div class="rk-flash"></div>
     <div class="rk-pre">${divOnly?"Division supérieure !":up?"Rang supérieur !":"Nouveau rang débloqué"}</div>
