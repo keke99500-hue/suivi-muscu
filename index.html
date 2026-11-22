@@ -493,8 +493,8 @@ const CATS = [
   {id:"dos",name:"Dos",ic:"🦅",unit:"kg",desc:"1RM estimé au rowing ou au tirage (vertical / horizontal)",src:[["Rowing barre","e1",1],["Rowing un bras","e1",1.5],["Tirage vertical (prise large)","e1",.95],["Tirage vertical (prise serrée)","e1",.95],["Tirage vertical (supination)","e1",.95],["Tirage horizontal (poulie)","e1",.9],["Tirage vertical unilatéral","e1",1.5]],th:[30,45,60,78,95,115,135]},
   {id:"jambes",name:"Jambes",ic:"🦵",unit:"kg",desc:"1RM estimé au squat",src:[["Squat","e1",1],["Split squat bulgare","e1",1.8]],th:[40,60,80,105,130,160,190]},
   {id:"force",name:"Force brute",ic:"⚒️",unit:"kg",desc:"1RM estimé au soulevé de terre",src:[["Soulevé de terre","e1",1],["Soulevé de terre roumain","e1",1.25]],th:[50,75,100,130,160,190,225]},
-  {id:"tractions",name:"Tractions",ic:"🧗",unit:"reps",desc:"Max de tractions en une série",src:[["Tractions","reps",1],["Tractions supination (chin-up)","reps",.9],["Tractions lestées","reps",1.4],["Muscle-up","reps",3]],th:[1,4,7,10,14,18,25]},
-  {id:"pompes",name:"Endurance",ic:"🔥",unit:"reps",desc:"Max de pompes en une série",src:[["Pompes","reps",1],["Pompes diamant","reps",1.2],["Pompes déclinées","reps",1.1],["Pompes claquées","reps",1.5],["Pompes archer","reps",2]],th:[5,12,20,30,40,50,65]},
+  {id:"tractions",name:"Tractions",ic:"🧗",unit:"reps",bw:1,desc:"Max de tractions en une série, ajusté à ton poids de corps + lest (réf. 75 kg)",src:[["Tractions","reps",1],["Tractions supination (chin-up)","reps",.9],["Tractions lestées","reps",1],["Muscle-up","reps",3]],th:[1,4,7,10,14,18,25]},
+  {id:"pompes",name:"Endurance",ic:"🔥",unit:"reps",bw:1,desc:"Max de pompes en une série, ajusté à ton poids de corps (réf. 75 kg)",src:[["Pompes","reps",1],["Pompes diamant","reps",1.2],["Pompes déclinées","reps",1.1],["Pompes claquées","reps",1.5],["Pompes archer","reps",2]],th:[5,12,20,30,40,50,65]},
   {id:"core",name:"Gainage",ic:"🧱",unit:"sec",desc:"Gainage le plus long",src:[["Gainage (sec)","val",1]],th:[20,40,60,90,120,180,300]},
   {id:"cardio",name:"Cardio",ic:"⚡",unit:"pts",desc:"Burpees max en une série, ou minutes de corde ×5",src:[["Burpees","reps",1],["Corde à sauter (min)","val",5]],th:[5,10,15,20,30,40,50]},
   {id:"skills",name:"Skills street",ic:"🤸",unit:"pts",desc:"Figures de street workout (L-sit, front lever, planche, muscle-up, HSPU, pistol, dragon flag)",src:[["L-sit (sec)","val",1],["Front lever tuck (sec)","val",1.5],["Front lever (sec)","val",4],["Planche tuck (sec)","val",2],["Planche (sec)","val",6],["Muscle-up","reps",8],["Handstand push-up","reps",5],["Pistol squat","reps",3],["Dragon flag","reps",4]],th:[8,15,25,40,60,85,120]},
@@ -516,10 +516,18 @@ const EX_COEF = {
 const coefOf = n => EX_COEF[n] ?? 1;
 function effortTag(n){ const c=coefOf(n); return c>=1.5?"⚡⚡⚡":c>=1.2?"⚡⚡":"⚡"; }
 function repsEq(name,r){ r=num(r); return name.includes("(sec)")?r/3:name==="Corde à sauter (min)"?r*10:r; }
-function setXP(name,kg,reps){ const r=Math.min(30,repsEq(name,reps)); if(r<=0) return 0; return coefOf(name)*(4+r*.6)*(1+Math.min(num(kg),200)/120); }
+/* ---- Poids de corps : ajuste reps PDC (réf. 75 kg) ---- */
+const BW_REF=75;
+// part du poids du corps soulevée
+const BW_FRAC={"Pompes":.64,"Pompes diamant":.66,"Pompes déclinées":.7,"Pompes claquées":.64,"Pompes archer":.8,"Pompes triceps (coudes serrés)":.65,"Tractions":1,"Tractions supination (chin-up)":1,"Tractions lestées":1,"Muscle-up":1,"Dips":.9,"Dips lestés":.9,"Burpees":.6,"Handstand push-up":.9,"Pike push-up":.7,"Pistol squat":.8};
+function weightAt(t){ const w=S.weights; if(!w.length) return null; let best=w[0]; for(const x of w){ if(x.date<=t+864e5) best=x; else break; } return num(best.kg)||null; }
+// facteur de reps équivalentes : (charge réelle / charge à 75 kg)^1.5, borné
+function bwFactor(name,lest,t,k=1.5){ const f=BW_FRAC[name]; if(!f) return 1; const bw=weightAt(t??Date.now())||BW_REF;
+  const load=bw*f+Math.max(0,num(lest)); return Math.max(.75,Math.min(1.7,Math.pow(load/(BW_REF*f),k))); }
+function setXP(name,kg,reps,t){ const r=Math.min(30,repsEq(name,reps)); if(r<=0) return 0; const bf=BW_FRAC[name]?Math.max(.85,Math.min(1.3,bwFactor(name,kg,t,1))):1; return bf*coefOf(name)*(4+r*.6)*(1+Math.min(num(kg),200)/120); }
 function sessionRawXP(s,durMin){
   let n=0, xp=0;
-  for(const e of s.exercises) for(const x of e.sets){ if(!x.done) continue; if(++n>XP_SET_CAP) break; xp+=setXP(e.name,x.kg,x.reps); }
+  for(const e of s.exercises) for(const x of e.sets){ if(!x.done) continue; if(++n>XP_SET_CAP) break; xp+=setXP(e.name,x.kg,x.reps,s.date); }
   if(!n) return 0;
   const d=durMin??s.duration??0;
   return Math.round(xp + Math.min(d,150)*.4 + 20);
@@ -784,7 +792,7 @@ function catScore(cat){
   for(const s of S.sessions) for(const e of s.exercises){
     const src=cat.src.find(x=>x[0]===e.name); if(!src) continue;
     for(const x of e.sets){ if(!x.done) continue; has=true;
-      const v=src[1]==="e1"?e1rm(num(x.kg),num(x.reps)):num(x.reps);
+      const v=src[1]==="e1"?e1rm(num(x.kg),num(x.reps)):num(x.reps)*(cat.bw?bwFactor(e.name,x.kg,s.date):1);
       best=Math.max(best,v*src[2]); }
   }
   return {score:Math.round(best*10)/10,has};
