@@ -491,7 +491,7 @@ const CATS = [
   {id:"pecs",name:"Pecs",ic:"🛡️",unit:"kg",desc:"1RM estimé au développé couché (ou équivalent poids de corps : ton poids + lest)",src:[["Développé couché","e1",1],["Développé incliné","e1",1.15],["Dips","bw",.75],["Dips lestés","bw",.75],["Pompes","bw",.7],["Pompes déclinées","bw",.7],["Pompes claquées","bw",.75],["Pompes archer","bw",.85]],th:[30,45,60,80,100,120,145]},
   {id:"epaules",name:"Épaules",ic:"🏔️",unit:"kg",desc:"1RM estimé au développé militaire (ou équivalent poids de corps : ton poids + lest)",src:[["Développé militaire","e1",1],["Handstand push-up","bw",.75],["Pike push-up","bw",.6]],th:[20,30,40,52,65,80,95]},
   {id:"dos",name:"Dos",ic:"🦅",unit:"kg",desc:"1RM estimé au rowing ou au tirage (vertical / horizontal) (ou équivalent poids de corps : ton poids + lest)",src:[["Rowing barre","e1",1],["Rowing un bras","e1",1.5],["Tirage vertical (prise large)","e1",.95],["Tirage vertical (prise serrée)","e1",.95],["Tirage vertical (supination)","e1",.95],["Tirage horizontal (poulie)","e1",.9],["Tirage vertical unilatéral","e1",1.5],["Tractions","bw",.9],["Tractions lestées","bw",.9],["Tractions supination (chin-up)","bw",.85],["Muscle-up","bw",1],["Tractions australiennes","bw",.9]],th:[30,45,60,78,95,115,135]},
-  {id:"jambes",name:"Jambes",ic:"🦵",unit:"kg",desc:"1RM estimé au squat (ou équivalent poids de corps : ton poids + lest)",src:[["Squat","e1",1],["Split squat bulgare","e1",1.8],["Pistol squat","bw",1.5]],th:[40,60,80,105,130,160,190]},
+  {id:"jambes",name:"Jambes",ic:"🦵",unit:"kg",desc:"1RM estimé au squat (ou équivalent poids de corps : ton poids + lest)",src:[["Squat","e1",1],["Split squat bulgare","e1",1.8],["Pistol squat","bw",1.5],["Squat sauté","bw",1],["Fentes","bw",.8]],th:[40,60,80,105,130,160,190]},
   {id:"force",name:"Force brute",ic:"⚒️",unit:"kg",desc:"1RM estimé au soulevé de terre",src:[["Soulevé de terre","e1",1],["Soulevé de terre roumain","e1",1.25]],th:[50,75,100,130,160,190,225]},
   {id:"tractions",name:"Tractions",ic:"🧗",unit:"reps",bw:1,desc:"Max de tractions en une série, ajusté à ton poids de corps + lest (réf. 75 kg)",src:[["Tractions","reps",1],["Tractions supination (chin-up)","reps",.9],["Tractions lestées","reps",1],["Muscle-up","reps",3]],th:[1,4,7,10,14,18,25]},
   {id:"pompes",name:"Endurance",ic:"🔥",unit:"reps",bw:1,desc:"Max de pompes en une série, ajusté à ton poids de corps (réf. 75 kg)",src:[["Pompes","reps",1],["Pompes diamant","reps",1.2],["Pompes déclinées","reps",1.1],["Pompes claquées","reps",1.5],["Pompes archer","reps",2]],th:[5,12,20,30,40,50,65]},
@@ -519,7 +519,9 @@ function repsEq(name,r){ r=num(r); return name.includes("(sec)")?r/3:name==="Cor
 /* ---- Poids de corps : ajuste reps PDC (réf. 75 kg) ---- */
 const BW_REF=75;
 // part du poids du corps soulevée
-const BW_FRAC={"Pompes":.64,"Pompes diamant":.66,"Pompes déclinées":.7,"Pompes claquées":.64,"Pompes archer":.8,"Pompes triceps (coudes serrés)":.65,"Tractions":1,"Tractions supination (chin-up)":1,"Tractions lestées":1,"Muscle-up":1,"Dips":.9,"Dips lestés":.9,"Burpees":.6,"Handstand push-up":.9,"Pike push-up":.7,"Pistol squat":.8,"Tractions australiennes":.55,"Dips sur banc":.5};
+const BW_FRAC={"Pompes":.64,"Pompes diamant":.66,"Pompes déclinées":.7,"Pompes claquées":.64,"Pompes archer":.8,"Pompes triceps (coudes serrés)":.65,"Tractions":1,"Tractions supination (chin-up)":1,"Tractions lestées":1,"Muscle-up":1,"Dips":.9,"Dips lestés":.9,"Burpees":.6,"Handstand push-up":.9,"Pike push-up":.7,"Pistol squat":.8,"Tractions australiennes":.55,"Dips sur banc":.5,"Fentes":.5,"Squat sauté":.5};
+// exos à charge faits SANS charge (kg vide/0) : part du poids du corps retenue
+const BW_EQ={"Squat":.5,"Split squat bulgare":.3,"Hip thrust":.4,"Dips lestés":.9,"Tractions lestées":1,"Mollets debout":.5};
 // charge réelle d'une série PDC (poids de corps × part soulevée + lest)
 function bwLoad(name,lest,t){ return (weightAt(t??Date.now())||BW_REF)*(BW_FRAC[name]||1)+Math.max(0,num(lest)); }
 function weightAt(t){ const w=S.weights; if(!w.length) return null; let best=w[0]; for(const x of w){ if(x.date<=t+864e5) best=x; else break; } return num(best.kg)||null; }
@@ -794,7 +796,7 @@ function catScore(cat){
   for(const s of S.sessions) for(const e of s.exercises){
     const src=cat.src.find(x=>x[0]===e.name); if(!src) continue;
     for(const x of e.sets){ if(!x.done) continue; has=true;
-      const v=src[1]==="e1"?e1rm(num(x.kg),num(x.reps)):src[1]==="bw"?e1rm(bwLoad(e.name,x.kg,s.date),Math.min(20,num(x.reps))):num(x.reps)*(cat.bw?bwFactor(e.name,x.kg,s.date):1);
+      const v=src[1]==="e1"?(num(x.kg)>0?e1rm(num(x.kg),num(x.reps)):BW_EQ[e.name]?e1rm((weightAt(s.date)||BW_REF)*BW_EQ[e.name],Math.min(30,num(x.reps))):0):src[1]==="bw"?e1rm(bwLoad(e.name,x.kg,s.date),Math.min(30,num(x.reps))):num(x.reps)*(cat.bw?bwFactor(e.name,x.kg,s.date):1);
       best=Math.max(best,v*src[2]); }
   }
   return {score:Math.round(best*10)/10,has};
@@ -1400,7 +1402,7 @@ function exBlock(e,i){
     <div class="lbl"><span>#</span><span>${bw?"lest kg":"kg"}</span><span>${u}</span><span></span><span></span></div>${bw?`<div class="small mut" style="text-align:center;margin:-2px 0 4px">Poids du corps : laisse vide (ou 0), ou mets le lest ajouté</div>`:""}
     ${e.sets.map((s,j)=>`<div class="set ${s.done?"done":""}">
       <span class="n">${j+1}</span>
-      <input inputmode="decimal" value="${esc(s.kg)}" placeholder="${l&&l.sets[j]&&num(l.sets[j].kg)?num(l.sets[j].kg):(bw?"PDC":"0")}" oninput="setVal(${i},${j},'kg',this.value)">
+      <input inputmode="decimal" value="${esc(s.kg)}" placeholder="${l&&l.sets[j]&&num(l.sets[j].kg)?num(l.sets[j].kg):(bw||BW_EQ[e.name]?"PDC":"0")}" oninput="setVal(${i},${j},'kg',this.value)">
       <input inputmode="numeric" value="${esc(s.reps)}" placeholder="${l&&l.sets[j]?num(l.sets[j].reps):"0"}" oninput="setVal(${i},${j},'reps',this.value)">
       <button class="chk" onclick="toggleSet(${i},${j})">✓</button>
       <button class="del" onclick="rmSet(${i},${j})">×</button>
